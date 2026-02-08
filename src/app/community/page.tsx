@@ -1,92 +1,62 @@
-'use client'
-
-import { useState } from 'react'
-import { dummyPosts, Post } from '@/data/posts'
+import Link from 'next/link'
+import { dummyPosts } from '@/data/posts'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+import { Button } from '@/components/ui/button'
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
+import { Eye, MessageSquare, PenLine } from 'lucide-react'
 
 export default function CommunityPage() {
-    const [posts, setPosts] = useState<Post[]>(dummyPosts)
-    const [isWriting, setIsWriting] = useState(false)
-    const [newTitle, setNewTitle] = useState('')
-    const [newContent, setNewContent] = useState('')
-
-    const handleSubmit = (e: React.FormEvent) => {
-        e.preventDefault()
-        const nextId = Math.max(...posts.map(p => p.id), 0) + 1
-        const newPost: Post = {
-            id: nextId,
-            title: newTitle,
-            author: '방문자',
-            content: newContent,
-            createdAt: new Date().toISOString().split('T')[0],
-            views: 0
-        }
-        setPosts([newPost, ...posts])
-        setIsWriting(false)
-        setNewTitle('')
-        setNewContent('')
-    }
-
     return (
-        <main className="container mx-auto py-8 px-4">
-            <div className="flex justify-between items-center mb-8">
-                <h1 className="text-3xl font-bold">자유 게시판</h1>
-                <button
-                    onClick={() => setIsWriting(!isWriting)}
-                    className="bg-black dark:bg-zinc-100 dark:text-black text-white px-6 py-2 rounded-full font-bold hover:opacity-80 transition-opacity"
-                >
-                    {isWriting ? '취소' : '글쓰기'}
-                </button>
-            </div>
+        <main className="container mx-auto py-12 px-4">
+            <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-12">
+                <div>
+                    <h1 className="text-4xl font-extrabold tracking-tight mb-2 flex items-center gap-3">
+                        자유 게시판 <MessageSquare className="text-primary w-8 h-8" />
+                    </h1>
+                    <p className="text-muted-foreground text-lg">카메라와 사진에 대한 일상적인 이야기를 나누는 공간입니다.</p>
+                </div>
+                <Button asChild className="rounded-2xl h-12 px-6 font-bold shadow-lg shadow-primary/20">
+                    <Link href="/community/write" className="flex items-center gap-2">
+                        <PenLine size={18} /> 글쓰기
+                    </Link>
+                </Button>
+            </header>
 
-            {isWriting && (
-                <form onSubmit={handleSubmit} className="mb-12 bg-zinc-50 dark:bg-zinc-900 p-8 rounded-2xl border">
-                    <div className="space-y-4">
-                        <input
-                            type="text"
-                            value={newTitle}
-                            onChange={(e) => setNewTitle(e.target.value)}
-                            placeholder="제목을 입력하세요"
-                            required
-                            className="w-full text-xl font-bold bg-transparent border-b py-2 focus:border-blue-600 outline-none"
-                        />
-                        <textarea
-                            value={newContent}
-                            onChange={(e) => setNewContent(e.target.value)}
-                            placeholder="내용을 입력하세요"
-                            required
-                            className="w-full h-48 bg-transparent border rounded-xl p-4 focus:ring-2 focus:ring-blue-600 outline-none resize-none"
-                        />
-                        <button type="submit" className="w-full bg-blue-600 text-white py-4 rounded-xl font-bold hover:bg-blue-700 transition-colors">
-                            게시글 등록
-                        </button>
-                    </div>
-                </form>
-            )}
-
-            <div className="bg-white dark:bg-zinc-900 border rounded-2xl overflow-hidden shadow-sm">
-                <table className="w-full text-left">
-                    <thead className="bg-zinc-50 dark:bg-zinc-800 text-zinc-500 text-sm border-b">
-                        <tr>
-                            <th className="p-4 pl-6">제목</th>
-                            <th className="p-4">작성자</th>
-                            <th className="p-4">날짜</th>
-                            <th className="p-4 text-center">조회수</th>
-                        </tr>
-                    </thead>
-                    <tbody className="divide-y">
-                        {posts.map((post) => (
-                            <tr key={post.id} className="hover:bg-zinc-50 dark:hover:bg-zinc-800/50 cursor-pointer group">
-                                <td className="p-4 pl-6">
-                                    <div className="font-medium group-hover:text-blue-600 transition-colors">{post.title}</div>
-                                </td>
-                                <td className="p-4 text-sm text-zinc-600 dark:text-zinc-400">{post.author}</td>
-                                <td className="p-4 text-sm text-zinc-500">{post.createdAt}</td>
-                                <td className="p-4 text-center text-sm text-zinc-500">{post.views}</td>
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
-            </div>
+            <Card className="border-muted/50 overflow-hidden shadow-2xl rounded-3xl">
+                <CardContent className="p-0">
+                    <Table>
+                        <TableHeader className="bg-muted/50">
+                            <TableRow className="hover:bg-transparent border-b-2">
+                                <TableHead className="w-[100px] text-center font-bold uppercase text-[11px] tracking-widest">번호</TableHead>
+                                <TableHead className="font-bold uppercase text-[11px] tracking-widest">제목</TableHead>
+                                <TableHead className="w-[120px] font-bold uppercase text-[11px] tracking-widest">작성자</TableHead>
+                                <TableHead className="w-[120px] font-bold uppercase text-[11px] tracking-widest">날짜</TableHead>
+                                <TableHead className="w-[100px] text-center font-bold uppercase text-[11px] tracking-widest">조회수</TableHead>
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                            {dummyPosts.map((post) => (
+                                <TableRow key={post.id} className="cursor-pointer group hover:bg-muted/30 transition-colors h-16">
+                                    <TableCell className="text-center font-medium text-muted-foreground">{post.id}</TableCell>
+                                    <TableCell>
+                                        <div className="font-bold group-hover:text-primary transition-colors text-base">
+                                            {post.title}
+                                        </div>
+                                    </TableCell>
+                                    <TableCell className="font-medium">{post.author}</TableCell>
+                                    <TableCell className="text-muted-foreground text-sm font-medium">{post.createdAt}</TableCell>
+                                    <TableCell className="text-center">
+                                        <div className="flex items-center justify-center gap-1 text-muted-foreground font-bold text-xs">
+                                            <Eye size={14} className="opacity-50" />
+                                            {post.views}
+                                        </div>
+                                    </TableCell>
+                                </TableRow>
+                            ))}
+                        </TableBody>
+                    </Table>
+                </CardContent>
+            </Card>
         </main>
     )
 }

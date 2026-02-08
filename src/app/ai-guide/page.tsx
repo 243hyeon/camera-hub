@@ -59,7 +59,7 @@ export default function AIGuidePage() {
             console.error('AI Error:', error)
             setMessages(prev => [...prev, {
                 role: 'ai',
-                content: '오류가 발생했습니다. API 키가 설정되어 있는지 확인해주세요.'
+                content: '죄송합니다. 서비스 연결에 문제가 발생했습니다. 잠시 후 다시 시도해주시거나, 관리자에게 문의해주세요.'
             }])
         } finally {
             setIsLoading(false)

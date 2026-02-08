@@ -1,11 +1,25 @@
+"use client"
+
+import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { ModeToggle } from '@/components/mode-toggle'
+import { useSearchParams } from 'next/navigation'
 
 const Navbar = () => {
+    const searchParams = useSearchParams()
+    const [isAdminVisible, setIsAdminVisible] = useState(false)
+
+    useEffect(() => {
+        const isLocal = window.location.hostname === 'localhost'
+        const hasAdminQuery = searchParams.get('admin') === 'true'
+        setIsAdminVisible(isLocal || hasAdminQuery)
+    }, [searchParams])
+
     const links = [
         { name: '뉴스', href: '/news' },
         { name: '바디', href: '/bodies' },
         { name: '렌즈', href: '/lenses' },
+        { name: '비교', href: '/compare' },
         { name: '사진 강의', href: '/lectures' },
         { name: '커뮤니티', href: '/community' },
         { name: 'AI 가이드', href: '/ai-guide' },
@@ -27,9 +41,11 @@ const Navbar = () => {
                     </div>
                 </div>
                 <div className="flex items-center gap-4">
-                    <Link href="/admin" className="hidden sm:inline-flex text-xs font-semibold px-3 py-1 bg-secondary text-secondary-foreground rounded-full hover:bg-secondary/80 transition-colors">
-                        ADMIN
-                    </Link>
+                    {isAdminVisible && (
+                        <Link href="/admin" className="hidden sm:inline-flex text-xs font-semibold px-3 py-1 bg-secondary text-secondary-foreground rounded-full hover:bg-secondary/80 transition-colors border">
+                            ADMIN
+                        </Link>
+                    )}
                     <ModeToggle />
                 </div>
             </div>
