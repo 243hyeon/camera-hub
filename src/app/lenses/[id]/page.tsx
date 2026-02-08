@@ -95,6 +95,16 @@ export default function LensDetailPage({ params }: { params: Promise<{ id: strin
                                         <TableCell className="font-semibold text-muted-foreground bg-muted/20">마운트</TableCell>
                                         <TableCell className="font-medium">{lens.specs.mount}</TableCell>
                                     </TableRow>
+                                    <TableRow className="hover:bg-transparent">
+                                        <TableCell className="font-semibold text-muted-foreground bg-muted/20">무게</TableCell>
+                                        <TableCell className="font-medium">{lens.specs.weight}g</TableCell>
+                                    </TableRow>
+                                    <TableRow className="hover:bg-transparent">
+                                        <TableCell className="font-semibold text-muted-foreground bg-muted/20">출시 가격</TableCell>
+                                        <TableCell className="font-black text-primary">
+                                            {new Intl.NumberFormat('ko-KR', { style: 'currency', currency: 'KRW' }).format(lens.specs.price)}
+                                        </TableCell>
+                                    </TableRow>
                                 </TableBody>
                             </Table>
                         </div>

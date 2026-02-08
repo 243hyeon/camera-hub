@@ -24,7 +24,9 @@ export default function AdminLensesPage() {
             specs: {
                 focalLength: (formData as any).focalLength || '',
                 aperture: (formData as any).aperture || '',
-                mount: (formData as any).mount || ''
+                mount: (formData as any).mount || '',
+                weight: Number((formData as any).weight) || 0,
+                price: Number((formData as any).price) || 0
             }
         }
         setLenses([newItem, ...lenses])
@@ -85,6 +87,24 @@ export default function AdminLensesPage() {
                                 required
                                 className="w-full p-2 border rounded-lg bg-white dark:bg-zinc-800"
                                 placeholder="예: G Master, L-series"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium mb-1">무게 (g)</label>
+                            <input
+                                type="number"
+                                onChange={(e) => setFormData({ ...formData, weight: Number(e.target.value) } as any)}
+                                required
+                                className="w-full p-2 border rounded-lg bg-white dark:bg-zinc-800"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium mb-1">가격 (원)</label>
+                            <input
+                                type="number"
+                                onChange={(e) => setFormData({ ...formData, price: Number(e.target.value) } as any)}
+                                required
+                                className="w-full p-2 border rounded-lg bg-white dark:bg-zinc-800"
                             />
                         </div>
                     </div>

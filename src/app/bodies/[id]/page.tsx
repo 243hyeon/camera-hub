@@ -95,6 +95,16 @@ export default function BodyDetailPage({ params }: { params: Promise<{ id: strin
                                         <TableCell className="font-semibold text-muted-foreground bg-muted/30">마운트</TableCell>
                                         <TableCell className="font-medium">{camera.specs.mount}</TableCell>
                                     </TableRow>
+                                    <TableRow className="hover:bg-transparent">
+                                        <TableCell className="font-semibold text-muted-foreground bg-muted/30">무게 (본체)</TableCell>
+                                        <TableCell className="font-medium">{camera.specs.weight}g</TableCell>
+                                    </TableRow>
+                                    <TableRow className="hover:bg-transparent">
+                                        <TableCell className="font-semibold text-muted-foreground bg-muted/30">출시 가격</TableCell>
+                                        <TableCell className="font-black text-primary">
+                                            {new Intl.NumberFormat('ko-KR', { style: 'currency', currency: 'KRW' }).format(camera.specs.price)}
+                                        </TableCell>
+                                    </TableRow>
                                 </TableBody>
                             </Table>
                         </div>

@@ -25,7 +25,9 @@ export default function AdminCamerasPage() {
             specs: {
                 sensor: (formData as any).sensor || '',
                 resolution: (formData as any).resolution || '',
-                mount: (formData as any).mount || ''
+                mount: (formData as any).mount || '',
+                weight: Number((formData as any).weight) || 0,
+                price: Number((formData as any).price) || 0
             },
             status: formData.status as any
         }
@@ -100,6 +102,24 @@ export default function AdminCamerasPage() {
                                 <option>신규</option>
                                 <option>단종</option>
                             </select>
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium mb-1">무게 (g)</label>
+                            <input
+                                type="number"
+                                onChange={(e) => setFormData({ ...formData, weight: Number(e.target.value) } as any)}
+                                required
+                                className="w-full p-2 border rounded-lg bg-white dark:bg-zinc-800"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium mb-1">가격 (원)</label>
+                            <input
+                                type="number"
+                                onChange={(e) => setFormData({ ...formData, price: Number(e.target.value) } as any)}
+                                required
+                                className="w-full p-2 border rounded-lg bg-white dark:bg-zinc-800"
+                            />
                         </div>
                     </div>
                     <button type="submit" className="mt-4 w-full bg-blue-600 text-white py-3 rounded-lg font-bold">추가하기</button>
