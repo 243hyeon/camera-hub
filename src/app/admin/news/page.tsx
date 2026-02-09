@@ -1,127 +1,92 @@
-'use client'
-
-import { useState } from 'react'
-import { dummyNews, News } from '@/data/news'
+import { getLatestNews } from '@/lib/fetchNews'
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
+import { Radio, RefreshCw, ExternalLink, ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
+import { Button } from '@/components/ui/button'
 
-export default function AdminNewsPage() {
-    const [newsList, setNewsList] = useState<News[]>(dummyNews)
-    const [isAdding, setIsAdding] = useState(false)
-    const [newTitle, setNewTitle] = useState('')
-    const [newCategory, setNewCategory] = useState<News['category']>('신제품')
-    const [newSummary, setNewSummary] = useState('')
-
-    const handleAddNews = (e: React.FormEvent) => {
-        e.preventDefault()
-        const nextId = Math.max(...newsList.map(n => n.id), 0) + 1
-        const newItem: News = {
-            id: nextId,
-            title: newTitle,
-            category: newCategory,
-            summary: newSummary,
-            createdAt: new Date().toISOString().split('T')[0]
-        }
-        setNewsList([newItem, ...newsList])
-        setIsAdding(false)
-        setNewTitle('')
-        setNewSummary('')
-    }
-
-    const handleDelete = (id: number) => {
-        if (confirm('정말로 삭제하시겠습니까?')) {
-            setNewsList(newsList.filter(n => n.id !== id))
-        }
-    }
+export default async function AdminNewsPage() {
+    const newsList = await getLatestNews();
 
     return (
-        <main className="container mx-auto py-8 px-4">
-            <div className="flex justify-between items-center mb-8">
-                <div>
-                    <Link href="/admin" className="text-blue-600 hover:underline text-sm mb-2 inline-block">← 대시보드</Link>
-                    <h1 className="text-3xl font-bold">뉴스 관리</h1>
+        <main className="container mx-auto py-12 px-4 max-w-5xl min-h-screen">
+            <header className="mb-12">
+                <Link href="/admin" className="text-primary hover:underline text-sm font-bold flex items-center gap-2 mb-4">
+                    <ArrowLeft size={16} /> 대시보드로 돌아가기
+                </Link>
+                <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+                    <h1 className="text-4xl font-black tracking-tight flex items-center gap-3">
+                        뉴스 엔진 상태 <RefreshCw className="text-primary w-8 h-8" />
+                    </h1>
+                    <Badge variant="outline" className="text-green-500 border-green-500/30 bg-green-500/5 px-4 py-2 font-bold animate-pulse">
+                        ● LIVE AGGREGATION ACTIVE
+                    </Badge>
                 </div>
-                <button
-                    onClick={() => setIsAdding(!isAdding)}
-                    className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
-                >
-                    {isAdding ? '취소' : '새 뉴스 작성'}
-                </button>
-            </div>
+            </header>
 
-            {isAdding && (
-                <form onSubmit={handleAddNews} className="bg-zinc-50 dark:bg-zinc-900 p-6 rounded-xl mb-8 border border-blue-200">
-                    <h2 className="text-xl font-bold mb-4">새 뉴스 작성</h2>
-                    <div className="space-y-4">
-                        <div>
-                            <label className="block text-sm font-medium mb-1">카테고리</label>
-                            <select
-                                value={newCategory}
-                                onChange={(e) => setNewCategory(e.target.value as any)}
-                                className="w-full p-2 border rounded-lg bg-white dark:bg-zinc-800"
-                            >
-                                <option value="신제품">신제품</option>
-                                <option value="시장 이슈">시장 이슈</option>
-                                <option value="SW 이슈">SW 이슈</option>
-                            </select>
+            <div className="grid gap-12">
+                <Card className="border-primary/20 bg-primary/5 shadow-2xl rounded-[2.5rem] overflow-hidden">
+                    <CardHeader className="p-10 border-b border-primary/10">
+                        <div className="flex items-center gap-4 mb-4">
+                            <div className="w-14 h-14 bg-primary/20 rounded-2xl flex items-center justify-center">
+                                <Radio className="text-primary w-8 h-8" />
+                            </div>
+                            <div>
+                                <CardTitle className="text-3xl font-black">자동 수집 엔진 가동 중</CardTitle>
+                                <CardDescription className="text-zinc-500 text-base font-medium">전 세계 카메라 미디어의 RSS 피드를 1시간 간격으로 동기화합니다.</CardDescription>
+                            </div>
                         </div>
-                        <div>
-                            <label className="block text-sm font-medium mb-1">제목</label>
-                            <input
-                                type="text"
-                                value={newTitle}
-                                onChange={(e) => setNewTitle(e.target.value)}
-                                required
-                                className="w-full p-2 border rounded-lg bg-white dark:bg-zinc-800"
-                                placeholder="뉴스 제목을 입력하세요"
-                            />
+                    </CardHeader>
+                    <CardContent className="p-10 space-y-8">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div className="bg-background/80 p-8 rounded-3xl border border-primary/10 shadow-sm flex flex-col gap-3">
+                                <span className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.3em]">Source Alpha</span>
+                                <h4 className="font-bold text-xl flex items-center justify-between">
+                                    DPReview
+                                    <Badge className="bg-green-500/20 text-green-600 border-none text-[10px]">CONNECTED</Badge>
+                                </h4>
+                            </div>
+                            <div className="bg-background/80 p-8 rounded-3xl border border-primary/10 shadow-sm flex flex-col gap-3">
+                                <span className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.3em]">Source Beta</span>
+                                <h4 className="font-bold text-xl flex items-center justify-between">
+                                    PetaPixel
+                                    <Badge className="bg-green-500/20 text-green-600 border-none text-[10px]">CONNECTED</Badge>
+                                </h4>
+                            </div>
                         </div>
-                        <div>
-                            <label className="block text-sm font-medium mb-1">요약</label>
-                            <textarea
-                                value={newSummary}
-                                onChange={(e) => setNewSummary(e.target.value)}
-                                className="w-full p-2 border rounded-lg bg-white dark:bg-zinc-800 h-24"
-                                placeholder="뉴스 요약 내용을 입력하세요"
-                            ></textarea>
-                        </div>
-                        <button type="submit" className="w-full bg-blue-600 text-white py-3 rounded-lg font-bold">저장하기</button>
-                    </div>
-                </form>
-            )}
 
-            <div className="bg-white dark:bg-zinc-900 border rounded-xl overflow-hidden">
-                <table className="w-full text-left">
-                    <thead className="bg-zinc-50 dark:bg-zinc-800 text-zinc-500 text-sm">
-                        <tr>
-                            <th className="p-4">카테고리</th>
-                            <th className="p-4">제목</th>
-                            <th className="p-4">작성일</th>
-                            <th className="p-4 text-right">관리</th>
-                        </tr>
-                    </thead>
-                    <tbody className="divide-y">
-                        {newsList.map((news) => (
-                            <tr key={news.id} className="hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition-colors">
-                                <td className="p-4">
-                                    <span className="text-xs font-bold px-2 py-1 bg-zinc-100 dark:bg-zinc-800 rounded uppercase">
-                                        {news.category}
-                                    </span>
-                                </td>
-                                <td className="p-4 font-medium">{news.title}</td>
-                                <td className="p-4 text-sm text-zinc-500">{news.createdAt}</td>
-                                <td className="p-4 text-right space-x-2">
-                                    <button className="text-sm text-blue-600 hover:underline">수정</button>
-                                    <button
-                                        onClick={() => handleDelete(news.id)}
-                                        className="text-sm text-red-600 hover:underline"
-                                    >
-                                        삭제
-                                    </button>
-                                </td>
-                            </tr>
+                        <div className="p-8 bg-zinc-900 rounded-[2rem] border border-zinc-800 text-sm font-medium leading-relaxed text-zinc-400">
+                            <h5 className="text-white font-bold mb-2">💡 시스템 안내</h5>
+                            현재 시스템은 `src/lib/fetchNews.ts`를 통해 자동화되어 있습니다. 수동 작성 기능은 엔진의 무결성을 위해 비활성화되었으며, 글로벌 벤더들의 소식이 입수되는 대로 즉시 사이트에 반영됩니다.
+                        </div>
+
+                        <Button asChild className="w-full h-16 rounded-[1.5rem] font-black text-xl gap-3 shadow-2xl shadow-primary/20">
+                            <Link href="/news">
+                                실시간 뉴스 피드 모니터링 <ExternalLink size={24} />
+                            </Link>
+                        </Button>
+                    </CardContent>
+                </Card>
+
+                <div className="space-y-6">
+                    <h2 className="text-2xl font-black px-2">최근 수집된 기사 샘플</h2>
+                    <div className="grid gap-4">
+                        {newsList.slice(0, 5).map((news, index) => (
+                            <div key={index} className="p-6 bg-muted/30 border rounded-3xl flex justify-between items-center group hover:bg-muted/50 transition-colors">
+                                <div className="space-y-1">
+                                    <div className="flex items-center gap-2">
+                                        <Badge variant="outline" className="text-[9px] font-bold px-2 h-5 border-zinc-700">{news.source}</Badge>
+                                        <span className="text-[10px] font-medium text-muted-foreground">{news.pubDate}</span>
+                                    </div>
+                                    <h4 className="font-bold text-lg group-hover:text-primary transition-colors">{news.title}</h4>
+                                </div>
+                                <Button variant="ghost" size="icon" className="shrink-0" asChild>
+                                    <a href={news.link} target="_blank"><ExternalLink size={18} /></a>
+                                </Button>
+                            </div>
                         ))}
-                    </tbody>
-                </table>
+                    </div>
+                </div>
             </div>
         </main>
     )
