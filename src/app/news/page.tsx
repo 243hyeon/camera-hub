@@ -41,9 +41,15 @@ export default function NewsPage() {
                             </CardDescription>
                         </CardContent>
 
-                        <CardFooter className="pt-0 pb-6 border-t mx-6 mt-4 flex justify-between items-center text-xs font-bold uppercase tracking-widest text-primary/60">
-                            <span>Read More</span>
-                            <div className="w-8 h-px bg-primary/30" />
+                        <CardFooter className="pt-4 border-t px-6">
+                            <a
+                                href={news.sourceUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="w-full h-10 rounded-xl bg-zinc-900 text-white font-bold text-sm hover:bg-black transition-colors flex items-center justify-center gap-2"
+                            >
+                                원문 기사 보러가기 →
+                            </a>
                         </CardFooter>
                     </Card>
                 ))}

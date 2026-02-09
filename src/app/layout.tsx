@@ -4,6 +4,7 @@ import "./globals.css";
 import { Suspense } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import ComparisonBar from "@/components/ComparisonBar";
 import { ThemeProvider } from "@/components/theme-provider";
 
 const inter = Inter({
@@ -38,6 +39,7 @@ export default function RootLayout({
           <div className="flex-1">
             {children}
           </div>
+          <ComparisonBar />
           <Footer />
         </ThemeProvider>
       </body>

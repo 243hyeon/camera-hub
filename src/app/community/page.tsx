@@ -36,12 +36,14 @@ export default function CommunityPage() {
                         </TableHeader>
                         <TableBody>
                             {dummyPosts.map((post) => (
-                                <TableRow key={post.id} className="cursor-pointer group hover:bg-muted/30 transition-colors h-16">
+                                <TableRow key={post.id} className="group hover:bg-muted/30 transition-colors h-16">
                                     <TableCell className="text-center font-medium text-muted-foreground">{post.id}</TableCell>
                                     <TableCell>
-                                        <div className="font-bold group-hover:text-primary transition-colors text-base">
-                                            {post.title}
-                                        </div>
+                                        <Link href={`/community/${post.id}`} className="block w-full">
+                                            <div className="font-bold group-hover:text-primary transition-colors text-base">
+                                                {post.title}
+                                            </div>
+                                        </Link>
                                     </TableCell>
                                     <TableCell className="font-medium">{post.author}</TableCell>
                                     <TableCell className="text-muted-foreground text-sm font-medium">{post.createdAt}</TableCell>
