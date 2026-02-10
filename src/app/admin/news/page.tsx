@@ -42,7 +42,7 @@ export default async function AdminNewsPage() {
                             <div className="bg-background/80 p-8 rounded-3xl border border-primary/10 shadow-sm flex flex-col gap-3">
                                 <span className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.3em]">Source Alpha</span>
                                 <h4 className="font-bold text-xl flex items-center justify-between">
-                                    DPReview
+                                    SonyAlphaRumors
                                     <Badge className="bg-green-500/20 text-green-600 border-none text-[10px]">CONNECTED</Badge>
                                 </h4>
                             </div>

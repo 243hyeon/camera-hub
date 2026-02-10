@@ -7,15 +7,16 @@ export interface NewsItem {
     pubDate: string;
     contentSnippet: string;
     imageUrl: string;
-    thumbnail?: string; // Added for compatibility
+    thumbnail?: string; // For compatibility
     source: string;
 }
 
 const parser = new Parser();
 
+// RSS Feeds list - Updated to remove unstable sources
 const RSS_FEEDS = [
-    { name: 'DPReview', url: 'https://www.dpreview.com/feeds/rss/latest' },
     { name: 'PetaPixel', url: 'https://petapixel.com/feed/' },
+    { name: 'SonyAlphaRumors', url: 'https://www.sonyalpharumors.com/feed/' },
 ];
 
 export async function getLatestNews(): Promise<NewsItem[]> {
