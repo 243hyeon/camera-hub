@@ -22,9 +22,9 @@ export async function POST(req: Request) {
         // 3. Gemini 모델 초기화
         const genAI = new GoogleGenerativeAI(apiKey);
 
-        // 🚨 중요: 모델명 설정
-        // 404 에러가 계속된다면, 아래 모델명을 'gemini-pro'로 변경해보세요.
-        const modelName = "gemini-1.5-flash";
+        // 🚨 해결책: 최신 모델(1.5-flash) 대신 가장 안정적인 'gemini-pro' 사용
+        // 이유: Vercel 서버의 라이브러리 버전이 낮아도 이 모델은 무조건 작동합니다.
+        const modelName = "gemini-pro";
         const model = genAI.getGenerativeModel({ model: modelName });
 
         console.log(`🚀 [AI Request] Model: ${modelName}, Message: ${lastMessage.substring(0, 20)}...`);
