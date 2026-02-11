@@ -22,9 +22,10 @@ export async function POST(req: Request) {
         // 3. Gemini 모델 초기화
         const genAI = new GoogleGenerativeAI(apiKey);
 
-        // 🚨 해결책: 최신 모델(1.5-flash) 대신 가장 안정적인 'gemini-pro' 사용
-        // 이유: Vercel 서버의 라이브러리 버전이 낮아도 이 모델은 무조건 작동합니다.
-        const modelName = "gemini-pro";
+        // 🚨 중요: 반드시 'gemini-1.5-flash'로 설정 (오타 주의!)
+        // gemini-pro (X) -> 이제 안 됩니다.
+        // gemini-1.5-flash (O) -> 무료이고 가장 빠릅니다.
+        const modelName = "gemini-1.5-flash";
         const model = genAI.getGenerativeModel({ model: modelName });
 
         console.log(`🚀 [AI Request] Model: ${modelName}, Message: ${lastMessage.substring(0, 20)}...`);
