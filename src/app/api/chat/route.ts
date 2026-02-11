@@ -22,10 +22,10 @@ export async function POST(req: Request) {
         // 3. Gemini 모델 초기화
         const genAI = new GoogleGenerativeAI(apiKey);
 
-        // 🚨 중요: 반드시 'gemini-1.5-flash'로 설정 (오타 주의!)
-        // gemini-pro (X) -> 이제 안 됩니다.
-        // gemini-1.5-flash (O) -> 무료이고 가장 빠릅니다.
-        const modelName = "gemini-1.5-flash";
+        // 🚨 해결책: 목록에 있는 가장 안정적인 최신 모델 'gemini-2.5-flash' 사용
+        // gemini-1.5-flash (X) -> 현재 환경의 가용 목록에 없음
+        // gemini-2.5-flash (O) -> 2025년 6월 릴리즈된 가장 안정적인 모델
+        const modelName = "gemini-2.5-flash";
         const model = genAI.getGenerativeModel({ model: modelName });
 
         console.log(`🚀 [AI Request] Model: ${modelName}, Message: ${lastMessage.substring(0, 20)}...`);
