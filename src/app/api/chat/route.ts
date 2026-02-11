@@ -1,40 +1,47 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { NextResponse } from "next/server";
-import { dummyCameras } from "@/data/cameras";
-import { dummyLenses } from "@/data/lenses";
-
-const genAI = new GoogleGenerativeAI(process.env.GOOGLE_GEMINI_API_KEY || "");
 
 export async function POST(req: Request) {
-    if (!process.env.GOOGLE_GEMINI_API_KEY) {
-        console.error("CRITICAL ERROR: GOOGLE_GEMINI_API_KEY is not defined in environment variables.");
-        return NextResponse.json({ error: "API Key not configured on server." }, { status: 500 });
-    }
-
     try {
-        const { messages } = await req.json();
+        // 1. 환경 변수 확인 로그 (보안을 위해 앞 4자리만 출력)
+        const apiKey = process.env.GOOGLE_GEMINI_API_KEY;
+        console.log("🔑 [API Check] Key exists?", !!apiKey);
+        if (apiKey) console.log("🔑 [API Check] Key starts with:", apiKey.substring(0, 4) + "...");
+
+        if (!apiKey) {
+            console.error("❌ [Server Error] GOOGLE_GEMINI_API_KEY is missing!");
+            return NextResponse.json(
+                { error: "Server Configuration Error: API Key missing" },
+                { status: 500 }
+            );
+        }
+
+        // 2. 요청 데이터 파싱
+        const body = await req.json();
+        const { messages } = body;
+
+        // 마지막 사용자 메시지 추출
         const lastMessage = messages[messages.length - 1].content;
+        console.log("📝 [User Message]", lastMessage);
 
-        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+        // 3. Gemini 모델 초기화
+        const genAI = new GoogleGenerativeAI(apiKey);
+        const model = genAI.getGenerativeModel({ model: "gemini-pro" });
 
-        // RAG 시스템을 위한 컨텍스트 생성 (카메라/렌즈 데이터)
-        const context = `
-현재 데이터베이스의 제품 정보:
-카메라: ${dummyCameras.map(c => `${c.brand} ${c.model} (${c.tier})`).join(", ")}
-렌즈: ${dummyLenses.map(l => `${l.brand} ${l.model} (${l.grade})`).join(", ")}
-
-위의 정보를 참고하여 사용자의 질문에 답변하세요. 
-답변은 친절하고 전문적이어야 하며, 한국어로 작성하세요.
-`;
-
-        const prompt = `${context}\n\n사용자 질문: ${lastMessage}`;
-        const result = await model.generateContent(prompt);
+        // 4. 응답 생성 요청
+        const result = await model.generateContent(lastMessage);
         const response = await result.response;
         const text = response.text();
 
-        return NextResponse.json({ content: text });
-    } catch (error) {
-        console.error("Gemini API Error:", error);
-        return NextResponse.json({ error: "Failed to fetch AI response" }, { status: 500 });
+        console.log("✅ [Gemini Response]", text.substring(0, 20) + "...");
+
+        return NextResponse.json({ role: 'assistant', content: text });
+
+    } catch (error: any) {
+        console.error("🚨 [Critical Error]", error);
+        return NextResponse.json(
+            { error: "AI Processing Failed", details: error.message },
+            { status: 500 }
+        );
     }
 }
