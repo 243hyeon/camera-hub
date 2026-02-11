@@ -3,13 +3,11 @@ import { NextResponse } from "next/server";
 
 export async function POST(req: Request) {
     try {
-        // 1. 환경 변수 확인 로그 (보안을 위해 앞 4자리만 출력)
-        const apiKey = process.env.GOOGLE_GEMINI_API_KEY;
-        console.log("🔑 [API Check] Key exists?", !!apiKey);
-        if (apiKey) console.log("🔑 [API Check] Key starts with:", apiKey.substring(0, 4) + "...");
+        // 1. API 키 검증 및 공백 제거 (Trim)
+        const apiKey = process.env.GOOGLE_GEMINI_API_KEY?.trim();
 
         if (!apiKey) {
-            console.error("❌ [Server Error] GOOGLE_GEMINI_API_KEY is missing!");
+            console.error("❌ [Server Error] API Key is missing or empty.");
             return NextResponse.json(
                 { error: "Server Configuration Error: API Key missing" },
                 { status: 500 }
@@ -19,28 +17,43 @@ export async function POST(req: Request) {
         // 2. 요청 데이터 파싱
         const body = await req.json();
         const { messages } = body;
-
-        // 마지막 사용자 메시지 추출
         const lastMessage = messages[messages.length - 1].content;
-        console.log("📝 [User Message]", lastMessage);
 
         // 3. Gemini 모델 초기화
         const genAI = new GoogleGenerativeAI(apiKey);
-        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+
+        // 🚨 중요: 모델명 설정
+        // 404 에러가 계속된다면, 아래 모델명을 'gemini-pro'로 변경해보세요.
+        const modelName = "gemini-1.5-flash";
+        const model = genAI.getGenerativeModel({ model: modelName });
+
+        console.log(`🚀 [AI Request] Model: ${modelName}, Message: ${lastMessage.substring(0, 20)}...`);
 
         // 4. 응답 생성 요청
         const result = await model.generateContent(lastMessage);
         const response = await result.response;
         const text = response.text();
 
-        console.log("✅ [Gemini Response]", text.substring(0, 20) + "...");
+        console.log("✅ [AI Response] Success!");
 
         return NextResponse.json({ role: 'assistant', content: text });
 
     } catch (error: any) {
-        console.error("🚨 [Critical Error]", error);
+        console.error("🚨 [Gemini API Error]", error);
+
+        // 지능형 에러 핸들링
+        if (error.message?.includes("404") || error.message?.includes("Not Found")) {
+            return NextResponse.json(
+                {
+                    error: "AI 모델 연결 실패",
+                    details: "API 키 권한 문제이거나, 해당 모델(gemini-1.5-flash)을 사용할 수 없는 프로젝트입니다. Google AI Studio에서 '새 프로젝트'로 키를 재생성해주세요."
+                },
+                { status: 404 }
+            );
+        }
+
         return NextResponse.json(
-            { error: "AI Processing Failed", details: error.message },
+            { error: "AI 처리 중 오류가 발생했습니다.", details: error.message },
             { status: 500 }
         );
     }
