@@ -9,6 +9,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
 import { Send, Sparkles, User } from 'lucide-react'
 import ReactMarkdown from 'react-markdown'
+import remarkGfm from 'remark-gfm'
 
 interface Message {
     role: 'user' | 'ai'
@@ -109,8 +110,16 @@ export default function AIGuidePage() {
                                     }`}>
                                     <div className="prose prose-sm dark:prose-invert max-w-none prose-p:leading-relaxed">
                                         <ReactMarkdown
+                                            remarkPlugins={[remarkGfm]}
                                             components={{
-                                                a: ({ node, ...props }) => <a {...props} target="_blank" rel="noopener noreferrer" />
+                                                a: ({ node, ...props }) => <a {...props} target="_blank" rel="noopener noreferrer" />,
+                                                table: ({ node, ...props }) => (
+                                                    <div className="overflow-x-auto my-4">
+                                                        <table className="min-w-full divide-y divide-zinc-700 border border-zinc-700" {...props} />
+                                                    </div>
+                                                ),
+                                                th: ({ node, ...props }) => <th className="bg-zinc-800 p-2 font-semibold text-left border border-zinc-700 text-zinc-200" {...props} />,
+                                                td: ({ node, ...props }) => <td className="p-2 border border-zinc-700 text-zinc-300" {...props} />,
                                             }}
                                         >
                                             {msg.content}
