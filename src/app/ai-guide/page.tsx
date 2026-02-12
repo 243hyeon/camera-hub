@@ -79,50 +79,50 @@ export default function AIGuidePage() {
             </div>
 
             <Card className="flex-1 overflow-hidden flex flex-col border-muted shadow-2xl rounded-3xl relative">
-                <ScrollArea className="flex-1 p-6">
-                    <div className="space-y-6">
-                        {messages.map((msg, idx) => (
-                            <div
-                                key={idx}
-                                className={`flex gap-4 ${msg.role === 'user' ? 'flex-row-reverse' : 'flex-row'}`}
-                            >
-                                <Avatar className={`w-10 h-10 border shadow-sm ${msg.role === 'user' ? 'bg-primary text-primary-foreground' : 'bg-muted'}`}>
-                                    {msg.role === 'user' ? (
-                                        <div className="flex items-center justify-center w-full h-full"><User size={20} /></div>
-                                    ) : (
-                                        <div className="flex items-center justify-center w-full h-full"><Sparkles size={20} className="text-primary" /></div>
-                                    )}
-                                </Avatar>
-                                <div className={`flex flex-col max-w-[75%] gap-2 ${msg.role === 'user' ? 'items-end' : 'items-start'}`}>
-                                    <div className={`p-4 rounded-2xl shadow-sm leading-relaxed ${msg.role === 'user'
-                                        ? 'bg-primary text-primary-foreground rounded-tr-none'
-                                        : 'bg-muted/50 border rounded-tl-none'
-                                        }`}>
-                                        {msg.content}
-                                    </div>
-                                    <span className="text-[10px] text-muted-foreground font-medium px-1 uppercase tracking-widest">
-                                        {msg.role === 'user' ? 'You' : 'Camera Expert'}
-                                    </span>
-                                </div>
-                            </div>
-                        ))}
-                        {isLoading && (
-                            <div className="flex gap-4">
-                                <Avatar className="w-10 h-10 bg-muted border animate-spin-slow">
+                {/* flex-1과 overflow-y-auto를 추가하여 스크롤을 활성화합니다. */}
+                <div className="flex-1 overflow-y-auto p-6 space-y-6 h-[600px]">
+                    {messages.map((msg, idx) => (
+                        <div
+                            key={idx}
+                            className={`flex gap-4 ${msg.role === 'user' ? 'flex-row-reverse' : 'flex-row'}`}
+                        >
+                            <Avatar className={`w-10 h-10 border shadow-sm ${msg.role === 'user' ? 'bg-primary text-primary-foreground' : 'bg-muted'}`}>
+                                {msg.role === 'user' ? (
+                                    <div className="flex items-center justify-center w-full h-full"><User size={20} /></div>
+                                ) : (
                                     <div className="flex items-center justify-center w-full h-full"><Sparkles size={20} className="text-primary" /></div>
-                                </Avatar>
-                                <div className="bg-muted/30 border p-4 rounded-2xl rounded-tl-none animate-pulse text-muted-foreground italic w-32 flex items-center justify-center">
-                                    <div className="flex gap-1">
-                                        <div className="w-1 h-1 bg-muted-foreground rounded-full animate-bounce" />
-                                        <div className="w-1 h-1 bg-muted-foreground rounded-full animate-bounce [animation-delay:0.2s]" />
-                                        <div className="w-1 h-1 bg-muted-foreground rounded-full animate-bounce [animation-delay:0.4s]" />
-                                    </div>
+                                )}
+                            </Avatar>
+                            <div className={`flex flex-col max-w-[75%] gap-2 ${msg.role === 'user' ? 'items-end' : 'items-start'}`}>
+                                <div className={`p-4 rounded-2xl shadow-sm leading-relaxed ${msg.role === 'user'
+                                    ? 'bg-primary text-primary-foreground rounded-tr-none'
+                                    : 'bg-muted/50 border rounded-tl-none'
+                                    }`}>
+                                    {msg.content}
+                                </div>
+                                <span className="text-[10px] text-muted-foreground font-medium px-1 uppercase tracking-widest">
+                                    {msg.role === 'user' ? 'You' : 'Camera Expert'}
+                                </span>
+                            </div>
+                        </div>
+                    ))}
+                    {isLoading && (
+                        <div className="flex gap-4">
+                            <Avatar className="w-10 h-10 bg-muted border animate-spin-slow">
+                                <div className="flex items-center justify-center w-full h-full"><Sparkles size={20} className="text-primary" /></div>
+                            </Avatar>
+                            <div className="bg-muted/30 border p-4 rounded-2xl rounded-tl-none animate-pulse text-muted-foreground italic w-32 flex items-center justify-center">
+                                <div className="flex gap-1">
+                                    <div className="w-1 h-1 bg-muted-foreground rounded-full animate-bounce" />
+                                    <div className="w-1 h-1 bg-muted-foreground rounded-full animate-bounce [animation-delay:0.2s]" />
+                                    <div className="w-1 h-1 bg-muted-foreground rounded-full animate-bounce [animation-delay:0.4s]" />
                                 </div>
                             </div>
-                        )}
-                        <div ref={messagesEndRef} />
-                    </div>
-                </ScrollArea>
+                        </div>
+                    )}
+                    {/* 자동 스크롤을 위한 투명 앵커 */}
+                    <div ref={messagesEndRef} />
+                </div>
 
                 <div className="p-4 border-t bg-muted/20">
                     <form onSubmit={handleSend} className="relative flex gap-2">
