@@ -75,7 +75,7 @@ export default function AIGuidePage() {
                     </h1>
                     <p className="text-muted-foreground mt-1">전문가급 카메라 지식으로 무장한 AI 어시스턴트</p>
                 </div>
-                <Badge variant="outline" className="px-3 py-1 font-bold">GEMINI 1.5 PRO</Badge>
+                <Badge variant="outline" className="px-3 py-1 font-bold">Google Gemini</Badge>
             </div>
 
             <Card className="flex-1 overflow-hidden flex flex-col border-muted shadow-2xl rounded-3xl relative">
