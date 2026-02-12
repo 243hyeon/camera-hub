@@ -20,10 +20,15 @@ export default function AIGuidePage() {
     ])
     const [input, setInput] = useState('')
     const [isLoading, setIsLoading] = useState(false)
-    const messagesEndRef = useRef<HTMLDivElement>(null)
+    const chatContainerRef = useRef<HTMLDivElement>(null)
 
     const scrollToBottom = () => {
-        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+        if (chatContainerRef.current) {
+            chatContainerRef.current.scrollTo({
+                top: chatContainerRef.current.scrollHeight,
+                behavior: 'smooth',
+            })
+        }
     }
 
     useEffect(() => {
@@ -80,7 +85,10 @@ export default function AIGuidePage() {
 
             <Card className="flex-1 overflow-hidden flex flex-col border-muted shadow-2xl rounded-3xl relative">
                 {/* flex-1과 overflow-y-auto를 추가하여 스크롤을 활성화합니다. */}
-                <div className="flex-1 overflow-y-auto p-6 space-y-6 h-[600px]">
+                <div
+                    ref={chatContainerRef}
+                    className="flex-1 overflow-y-auto p-6 space-y-6 h-[600px]"
+                >
                     {messages.map((msg, idx) => (
                         <div
                             key={idx}
@@ -120,8 +128,6 @@ export default function AIGuidePage() {
                             </div>
                         </div>
                     )}
-                    {/* 자동 스크롤을 위한 투명 앵커 */}
-                    <div ref={messagesEndRef} />
                 </div>
 
                 <div className="p-4 border-t bg-muted/20">
