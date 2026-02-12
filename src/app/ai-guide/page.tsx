@@ -10,6 +10,8 @@ import { Badge } from '@/components/ui/badge'
 import { Send, Sparkles, User } from 'lucide-react'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
+import { dummyCameras } from '@/data/cameras'
+import { dummyLenses } from '@/data/lenses'
 
 interface Message {
     role: 'user' | 'ai'
@@ -23,6 +25,42 @@ export default function AIGuidePage() {
     const [input, setInput] = useState('')
     const [isLoading, setIsLoading] = useState(false)
     const chatContainerRef = useRef<HTMLDivElement>(null)
+
+    const handleAddToCompare = (modelName: string) => {
+        // 데이터셋에서 모델 찾기
+        const camera = dummyCameras.find(c => c.model === modelName);
+        const lens = dummyLenses.find(l => l.model === modelName);
+
+        if (camera) {
+            const compareList = JSON.parse(localStorage.getItem('compare-bodies') || '[]')
+            if (compareList.includes(camera.id)) {
+                alert('이미 비교함에 들어있습니다.')
+                return
+            }
+            if (compareList.length >= 3) {
+                alert('최대 3개까지만 비교 가능합니다.')
+                return
+            }
+            const newList = [...compareList, camera.id]
+            localStorage.setItem('compare-bodies', JSON.stringify(newList))
+            alert(`'${modelName}' 바디를 비교함에 담았습니다!`)
+        } else if (lens) {
+            const compareList = JSON.parse(localStorage.getItem('compare-lenses') || '[]')
+            if (compareList.includes(lens.id)) {
+                alert('이미 비교함에 들어있습니다.')
+                return
+            }
+            if (compareList.length >= 3) {
+                alert('최대 3개까지만 비교 가능합니다.')
+                return
+            }
+            const newList = [...compareList, lens.id]
+            localStorage.setItem('compare-lenses', JSON.stringify(newList))
+            alert(`'${modelName}' 렌즈를 비교함에 담았습니다!`)
+        } else {
+            alert(`'${modelName}' 모델을 데이터베이스에서 찾을 수 없습니다. 정확한 모델명인지 확인이 필요합니다.`)
+        }
+    };
 
     const scrollToBottom = () => {
         if (chatContainerRef.current) {
@@ -114,12 +152,32 @@ export default function AIGuidePage() {
                                             components={{
                                                 a: ({ node, ...props }) => <a {...props} target="_blank" rel="noopener noreferrer" />,
                                                 table: ({ node, ...props }) => (
-                                                    <div className="overflow-x-auto my-4">
+                                                    <div className="overflow-x-auto my-4 text-xs">
                                                         <table className="min-w-full divide-y divide-zinc-700 border border-zinc-700" {...props} />
                                                     </div>
                                                 ),
                                                 th: ({ node, ...props }) => <th className="bg-zinc-800 p-2 font-semibold text-left border border-zinc-700 text-zinc-200" {...props} />,
-                                                td: ({ node, ...props }) => <td className="p-2 border border-zinc-700 text-zinc-300" {...props} />,
+                                                td: ({ node, children, ...props }) => {
+                                                    const content = String(children);
+                                                    const match = content.match(/^\[\[COMPARE:(.+)\]\]$/);
+
+                                                    if (match) {
+                                                        const modelName = match[1];
+                                                        return (
+                                                            <td className="p-2 border border-zinc-700 text-center">
+                                                                <Button
+                                                                    size="sm"
+                                                                    variant="secondary"
+                                                                    className="h-7 px-3 text-[10px] rounded-full font-bold bg-blue-600/20 text-blue-400 hover:bg-blue-600 hover:text-white transition-all border-none"
+                                                                    onClick={() => handleAddToCompare(modelName)}
+                                                                >
+                                                                    + 비교담기
+                                                                </Button>
+                                                            </td>
+                                                        );
+                                                    }
+                                                    return <td className="p-2 border border-zinc-700 text-zinc-300" {...props}>{children}</td>;
+                                                },
                                             }}
                                         >
                                             {msg.content}
