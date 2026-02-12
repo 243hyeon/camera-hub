@@ -8,6 +8,7 @@ import { ScrollArea } from '@/components/ui/scroll-area'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
 import { Send, Sparkles, User } from 'lucide-react'
+import ReactMarkdown from 'react-markdown'
 
 interface Message {
     role: 'user' | 'ai'
@@ -106,7 +107,15 @@ export default function AIGuidePage() {
                                     ? 'bg-primary text-primary-foreground rounded-tr-none'
                                     : 'bg-muted/50 border rounded-tl-none'
                                     }`}>
-                                    {msg.content}
+                                    <div className="prose prose-sm dark:prose-invert max-w-none prose-p:leading-relaxed">
+                                        <ReactMarkdown
+                                            components={{
+                                                a: ({ node, ...props }) => <a {...props} target="_blank" rel="noopener noreferrer" />
+                                            }}
+                                        >
+                                            {msg.content}
+                                        </ReactMarkdown>
+                                    </div>
                                 </div>
                                 <span className="text-[10px] text-muted-foreground font-medium px-1 uppercase tracking-widest">
                                     {msg.role === 'user' ? 'You' : 'Camera Expert'}
