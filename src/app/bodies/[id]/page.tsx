@@ -1,125 +1,76 @@
-import { use } from 'react'
-import { Metadata } from 'next'
-import Link from 'next/link'
-import { dummyCameras } from '@/data/cameras'
-import { notFound } from 'next/navigation'
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
-import { Separator } from '@/components/ui/separator'
-import { Table, TableBody, TableCell, TableRow } from '@/components/ui/table'
-import { ChevronLeft } from 'lucide-react'
+// src/app/bodies/[id]/page.tsx
+import { supabase } from '@/lib/supabase';
+import Link from 'next/link';
 
-export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
-    const { id } = await params
-    const camera = dummyCameras.find(c => c.id === parseInt(id))
+export const dynamic = 'force-dynamic'; // 실시간 DB 연동을 위한 마법의 한 줄!
 
-    if (!camera) return { title: 'Camera Not Found' }
+export default async function BodyDetailPage(props: { params: Promise<{ id: string }> }) {
+    const params = await props.params;
 
-    return {
-        title: `${camera.brand} ${camera.model} 스펙 및 리뷰 | Camera Hub`,
-        description: `${camera.model}의 상세 사양, 센서 정보, 입고 상태를 확인하세요. ${camera.description.substring(0, 100)}...`,
-        openGraph: {
-            title: `${camera.brand} ${camera.model} 상세 정보`,
-            description: camera.description,
-            type: 'website',
-        }
-    }
-}
+    // 1. 주소창의 id 값(예: 1)을 이용해 Supabase에서 딱 1개의 카메라 데이터만 뽑아옵니다.
+    const { data: camera, error } = await supabase
+        .from('bodies')
+        .select('*')
+        .eq('id', params.id)
+        .single();
 
-export default function BodyDetailPage({ params }: { params: Promise<{ id: string }> }) {
-    const { id } = use(params)
-    const camera = dummyCameras.find(c => c.id === parseInt(id))
-
-    if (!camera) {
-        notFound()
+    // 2. 에러가 나거나 카메라가 없으면 보여줄 에러 화면
+    if (error || !camera) {
+        return (
+            <div className="container mx-auto p-10 text-center text-white mt-20">
+                <h1 className="text-2xl text-red-500 mb-4">카메라 정보를 찾을 수 없습니다. 😥</h1>
+                <Link href="/bodies" className="text-blue-500 hover:underline">목록으로 돌아가기</Link>
+            </div>
+        );
     }
 
+    // 3. 성공적으로 가져왔을 때 보여줄 웅장한 상세 페이지 화면
     return (
-        <main className="container mx-auto py-12 px-4 max-w-5xl">
-            <Button variant="ghost" asChild className="mb-8 -ml-4">
-                <Link href="/bodies" className="flex items-center gap-1">
-                    <ChevronLeft className="w-4 h-4" />
-                    목록으로 돌아가기
-                </Link>
-            </Button>
+        <div className="container mx-auto p-6 max-w-5xl mt-12 text-white">
+            <Link href="/bodies" className="text-gray-400 hover:text-white mb-8 inline-block transition-colors">
+                ← 목록으로 돌아가기
+            </Link>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-start">
-                {/* 이미지 영역 */}
-                <div className="aspect-[4/3] bg-muted rounded-3xl overflow-hidden shadow-2xl border border-muted ring-1 ring-border/50">
-                    {camera.imageUrl ? (
-                        <img src={camera.imageUrl} alt={camera.model} className="w-full h-full object-cover" />
-                    ) : (
-                        <div className="w-full h-full flex flex-col items-center justify-center text-muted-foreground gap-2">
-                            <span className="text-4xl">📸</span>
-                            <p className="font-medium">이미지 준비 중</p>
-                        </div>
-                    )}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-12 bg-[#1c1c1c] border border-gray-800 p-8 rounded-3xl shadow-2xl">
+
+                {/* 왼쪽: 카메라 이미지 */}
+                <div className="relative h-[400px] w-full bg-white rounded-2xl overflow-hidden flex items-center justify-center p-6">
+                    {/* 상세 페이지는 제품의 전체 모습이 잘려선 안 되므로 object-contain을 사용합니다 */}
+                    <img
+                        src={camera.image_url || camera.imageUrl}
+                        alt={camera.name || camera.model}
+                        className="w-full h-full object-contain drop-shadow-lg"
+                    />
                 </div>
 
-                {/* 정보 영역 */}
-                <div className="space-y-8">
+                {/* 오른쪽: 상세 스펙 정보 */}
+                <div className="flex flex-col justify-center space-y-6">
                     <div>
-                        <div className="flex flex-wrap gap-2 mb-4">
-                            <Badge variant="outline" className="text-[10px] font-bold tracking-tighter uppercase px-2">
-                                {camera.brand}
-                            </Badge>
-                            <Badge variant={camera.status === '신규' ? 'default' : 'secondary'} className="text-[10px] font-bold uppercase px-2">
-                                {camera.status}
-                            </Badge>
-                            <Badge variant="secondary" className="text-[10px] font-bold uppercase px-2 bg-blue-500/10 text-blue-600 dark:text-blue-400 hover:bg-blue-500/20 border-transparent">
-                                {camera.tier}
-                            </Badge>
-                        </div>
-                        <h1 className="text-4xl lg:text-5xl font-extrabold tracking-tight mb-4">{camera.model}</h1>
-                        <p className="text-lg text-muted-foreground leading-relaxed">
-                            {camera.description}
-                        </p>
+                        <span className="text-sm text-blue-500 font-extrabold tracking-widest uppercase mb-2 block">
+                            {camera.brand}
+                        </span>
+                        <h1 className="text-4xl font-extrabold tracking-tight">{camera.name || camera.model}</h1>
                     </div>
 
-                    <Separator className="my-8" />
+                    <p className="text-3xl font-bold">
+                        {(camera.price || 0).toLocaleString()} <span className="text-xl font-medium text-gray-400">원</span>
+                    </p>
 
-                    <div className="space-y-4">
-                        <h2 className="text-sm font-bold tracking-widest uppercase text-muted-foreground">Technical Specifications</h2>
-                        <div className="rounded-xl border overflow-hidden">
-                            <Table>
-                                <TableBody>
-                                    <TableRow className="hover:bg-transparent">
-                                        <TableCell className="font-semibold text-muted-foreground w-1/3 bg-muted/30">센서 크기</TableCell>
-                                        <TableCell className="font-medium">{camera.specs.sensor}</TableCell>
-                                    </TableRow>
-                                    <TableRow className="hover:bg-transparent">
-                                        <TableCell className="font-semibold text-muted-foreground bg-muted/30">유효 화소</TableCell>
-                                        <TableCell className="font-medium">{camera.specs.resolution}</TableCell>
-                                    </TableRow>
-                                    <TableRow className="hover:bg-transparent">
-                                        <TableCell className="font-semibold text-muted-foreground bg-muted/30">마운트</TableCell>
-                                        <TableCell className="font-medium">{camera.specs.mount}</TableCell>
-                                    </TableRow>
-                                    <TableRow className="hover:bg-transparent">
-                                        <TableCell className="font-semibold text-muted-foreground bg-muted/30">무게 (본체)</TableCell>
-                                        <TableCell className="font-medium">{camera.specs.weight}g</TableCell>
-                                    </TableRow>
-                                    <TableRow className="hover:bg-transparent">
-                                        <TableCell className="font-semibold text-muted-foreground bg-muted/30">출시 가격</TableCell>
-                                        <TableCell className="font-black text-primary">
-                                            {new Intl.NumberFormat('ko-KR', { style: 'currency', currency: 'KRW' }).format(camera.specs.price)}
-                                        </TableCell>
-                                    </TableRow>
-                                </TableBody>
-                            </Table>
+                    <div className="space-y-4 mt-4 pt-6 border-t border-gray-800">
+                        <div>
+                            <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-1">분류</h3>
+                            <p className="text-lg">{camera.type || camera.tier}</p>
                         </div>
-                    </div>
 
-                    <div className="pt-4 flex gap-4">
-                        <Button size="lg" className="flex-1 rounded-2xl h-14 text-lg font-bold shadow-xl shadow-primary/20">
-                            구매 문의
-                        </Button>
-                        <Button size="lg" variant="outline" className="flex-1 rounded-2xl h-14 text-lg font-bold">
-                            비교하기
-                        </Button>
+                        <div>
+                            <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-1">상세 설명</h3>
+                            <p className="leading-relaxed break-keep text-gray-300">
+                                {camera.description || '등록된 상세 설명이 없습니다.'}
+                            </p>
+                        </div>
                     </div>
                 </div>
             </div>
-        </main>
-    )
+        </div>
+    );
 }
