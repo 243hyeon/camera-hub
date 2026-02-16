@@ -4,6 +4,8 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 
+export const dynamic = 'force-dynamic';
+
 export default async function BodiesPage() {
     // 1. Supabase의 'bodies' 테이블에서 모든 데이터(*)를 가져옵니다.
     const { data: realCameras, error } = await supabase.from('bodies').select('*');
@@ -27,22 +29,20 @@ export default async function BodiesPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                 {realCameras?.map((camera) => (
                     <Card key={camera.id} className="overflow-hidden group hover:shadow-xl transition-all border-muted">
-                        <div className="aspect-video bg-muted relative flex items-center justify-center overflow-hidden">
-                            {/* DB에 이미지 URL이 있을 경우 사용, 없으면 대체 텍스트 표시 */}
+                        <div className="relative h-[240px] w-full bg-white flex items-center justify-center overflow-hidden border-b">
                             {camera.image_url || camera.imageUrl ? (
                                 <img
                                     src={camera.image_url || camera.imageUrl}
                                     alt={camera.name || camera.model}
-                                    className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                                    className="w-full h-full object-contain p-6 group-hover:scale-110 transition-transform duration-500"
                                 />
                             ) : (
                                 <div className="flex flex-col items-center gap-2">
                                     <span className="text-muted-foreground italic text-sm">이미지가 등록되지 않았습니다</span>
-                                    <span className="text-xs text-muted-foreground/50">(DB 확인 필요)</span>
                                 </div>
                             )}
-                            <div className="absolute top-3 left-3 flex gap-2">
-                                <Badge variant={camera.status === '신규' ? 'default' : 'secondary'} className="shadow-sm">
+                            <div className="absolute top-4 left-4 flex gap-2">
+                                <Badge variant={camera.status === '신규' ? 'default' : 'secondary'} className="shadow-md">
                                     {camera.status || '상태 미정'}
                                 </Badge>
                             </div>
