@@ -1,116 +1,89 @@
-"use client";
-
-import { useState } from 'react'
 import Link from 'next/link'
-import { dummyCameras } from '@/data/cameras'
+import { supabase } from "@/lib/supabase"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 
-export default function BodiesPage() {
-    const brands = ['캐논', '니콘', '소니']
-    const [selectedBrand, setSelectedBrand] = useState<string | null>(null)
+export default async function BodiesPage() {
+    // 1. Supabase의 'bodies' 테이블에서 모든 데이터(*)를 가져옵니다.
+    const { data: realCameras, error } = await supabase.from('bodies').select('*');
 
-    const filteredCameras = selectedBrand
-        ? dummyCameras.filter(c => c.brand === selectedBrand)
-        : dummyCameras
+    if (error) {
+        console.error("데이터를 불러오지 못했습니다:", error);
+    }
 
-    const tierOrder = { '고급기': 1, '중급기': 2, '보급기': 3 }
-    const sortedCameras = [...filteredCameras].sort((a, b) => tierOrder[a.tier] - tierOrder[b.tier])
+    // 브랜드 필터 기능은 서버 컴포넌트 환경에 맞춰 나중에 쿼리 스트링 등으로 구현할 수 있습니다.
+    // 현재는 DB에서 가져온 모든 데이터를 출력합니다.
 
     return (
         <main className="container mx-auto py-12 px-4">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-12">
                 <div>
                     <h1 className="text-4xl font-extrabold tracking-tight mb-2">카메라 바디</h1>
-                    <p className="text-muted-foreground">시장을 선도하는 주요 브랜드의 미러리스 라인업</p>
-                </div>
-                <div className="flex flex-wrap gap-2">
-                    <Button
-                        variant={selectedBrand === null ? "default" : "outline"}
-                        onClick={() => setSelectedBrand(null)}
-                        className="rounded-full px-6"
-                    >
-                        전체
-                    </Button>
-                    {brands.map((brand) => (
-                        <Button
-                            key={brand}
-                            variant={selectedBrand === brand ? "default" : "outline"}
-                            onClick={() => setSelectedBrand(brand)}
-                            className="rounded-full px-6"
-                        >
-                            {brand}
-                        </Button>
-                    ))}
+                    <p className="text-muted-foreground">시장을 선도하는 주요 브랜드의 미러리스 라인업 (실시간 데이터베이스 연동)</p>
                 </div>
             </div>
 
-            <div className="space-y-16">
-                {['고급기', '중급기', '보급기'].map((tier) => {
-                    const camerasInTier = sortedCameras.filter(c => c.tier === tier)
-                    if (camerasInTier.length === 0) return null
-
-                    return (
-                        <section key={tier}>
-                            <div className="flex items-center gap-4 mb-8">
-                                <h2 className="text-2xl font-bold">{tier}</h2>
-                                <div className="h-px flex-1 bg-border" />
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                {realCameras?.map((camera) => (
+                    <Card key={camera.id} className="overflow-hidden group hover:shadow-xl transition-all border-muted">
+                        <div className="aspect-video bg-muted relative flex items-center justify-center overflow-hidden">
+                            {/* DB에 이미지 URL이 있을 경우 사용, 없으면 대체 텍스트 표시 */}
+                            {camera.image_url || camera.imageUrl ? (
+                                <img
+                                    src={camera.image_url || camera.imageUrl}
+                                    alt={camera.name || camera.model}
+                                    className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                                />
+                            ) : (
+                                <div className="flex flex-col items-center gap-2">
+                                    <span className="text-muted-foreground italic text-sm">이미지가 등록되지 않았습니다</span>
+                                    <span className="text-xs text-muted-foreground/50">(DB 확인 필요)</span>
+                                </div>
+                            )}
+                            <div className="absolute top-3 left-3 flex gap-2">
+                                <Badge variant={camera.status === '신규' ? 'default' : 'secondary'} className="shadow-sm">
+                                    {camera.status || '상태 미정'}
+                                </Badge>
                             </div>
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                                {camerasInTier.map((camera) => (
-                                    <Card key={camera.id} className="overflow-hidden group hover:shadow-xl transition-all border-muted">
-                                        <div className="aspect-video bg-muted relative flex items-center justify-center overflow-hidden">
-                                            {camera.imageUrl ? (
-                                                <img src={camera.imageUrl} alt={camera.model} className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
-                                            ) : (
-                                                <span className="text-muted-foreground italic">No Image Available</span>
-                                            )}
-                                            <div className="absolute top-3 left-3 flex gap-2">
-                                                <Badge variant={camera.status === '신규' ? 'default' : 'secondary'} className="shadow-sm">
-                                                    {camera.status}
-                                                </Badge>
-                                            </div>
-                                        </div>
-                                        <CardHeader>
-                                            <div className="flex justify-between items-start mb-2">
-                                                <span className="text-xs font-bold text-primary/60 tracking-widest uppercase">{camera.brand}</span>
-                                            </div>
-                                            <CardTitle className="text-2xl">{camera.model}</CardTitle>
-                                            <CardDescription className="line-clamp-2 mt-2">{camera.description}</CardDescription>
-                                        </CardHeader>
-                                        <CardFooter className="bg-muted/20 border-t pt-4 gap-2">
-                                            <Button asChild className="flex-1 rounded-xl">
-                                                <Link href={`/bodies/${camera.id}`}>자세히 보기</Link>
-                                            </Button>
-                                            <Button
-                                                variant="outline"
-                                                className="rounded-xl"
-                                                onClick={() => {
-                                                    const compareList = JSON.parse(localStorage.getItem('compare-bodies') || '[]')
-                                                    if (compareList.includes(camera.id)) {
-                                                        alert('이미 비교함에 들어있습니다.')
-                                                        return
-                                                    }
-                                                    if (compareList.length >= 3) {
-                                                        alert('최대 3개까지만 비교 가능합니다.')
-                                                        return
-                                                    }
-                                                    const newList = [...compareList, camera.id]
-                                                    localStorage.setItem('compare-bodies', JSON.stringify(newList))
-                                                    alert(`${camera.model}이(가) 비교함에 담겼습니다.`)
-                                                }}
-                                            >
-                                                비교
-                                            </Button>
-                                        </CardFooter>
-                                    </Card>
-                                ))}
+                        </div>
+                        <CardHeader>
+                            <div className="flex justify-between items-start mb-2">
+                                <span className="text-xs font-bold text-primary/60 tracking-widest uppercase">
+                                    {camera.brand || camera.type || 'BRAND'}
+                                </span>
                             </div>
-                        </section>
-                    )
-                })}
+                            <CardTitle className="text-2xl">{camera.name || camera.model}</CardTitle>
+                            <CardDescription className="line-clamp-2 mt-2">
+                                {camera.description || '제품 설명이 준비 중입니다.'}
+                            </CardDescription>
+                            <div className="mt-4 flex items-baseline gap-1">
+                                <span className="text-2xl font-black text-primary">
+                                    {(camera.price || camera.specs?.price || 0).toLocaleString()}
+                                </span>
+                                <span className="text-sm font-bold text-muted-foreground font-sans">원</span>
+                            </div>
+                        </CardHeader>
+                        <CardFooter className="bg-muted/20 border-t pt-4 gap-2">
+                            <Button asChild className="flex-1 rounded-xl">
+                                <Link href={`/bodies/${camera.id}`}>자세히 보기</Link>
+                            </Button>
+                            <Button
+                                variant="outline"
+                                className="rounded-xl"
+                            >
+                                비교
+                            </Button>
+                        </CardFooter>
+                    </Card>
+                ))}
             </div>
+
+            {realCameras?.length === 0 && (
+                <div className="text-center py-24 bg-muted/10 rounded-3xl border border-dashed">
+                    <p className="text-muted-foreground">데이터베이스에 등록된 카메라가 없습니다.</p>
+                </div>
+            )}
         </main>
     )
 }
