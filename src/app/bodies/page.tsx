@@ -34,7 +34,7 @@ export default async function BodiesPage() {
                                 <img
                                     src={camera.image_url || camera.imageUrl}
                                     alt={camera.name || camera.model}
-                                    className="w-full h-full object-contain p-6 group-hover:scale-110 transition-transform duration-500"
+                                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                                 />
                             ) : (
                                 <div className="flex flex-col items-center gap-2">
