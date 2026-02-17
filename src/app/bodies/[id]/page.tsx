@@ -70,40 +70,73 @@ export default async function BodyDetailPage(props: { params: Promise<{ id: stri
                         </div>
                     </div>
 
-                    {/* 👇 여기서부터 새로 추가하는 '주요 스펙' 영역입니다 👇 */}
+                    {/* 👇 여기서부터 '주요 스펙' 영역입니다 👇 */}
                     <div className="mt-8 pt-8 border-t border-gray-800">
                         <h3 className="text-lg font-bold text-white mb-6">주요 스펙</h3>
+                        {/* grid-cols-2 속성 덕분에 박스 개수가 늘어나도 자동으로 2칸씩 짝을 맞춰 예쁘게 내려갑니다 */}
                         <div className="grid grid-cols-2 gap-4">
 
                             {/* 센서 */}
-                            {(camera.sensor) && (
+                            {camera.sensor && (
                                 <div className="bg-gray-800/50 p-4 rounded-xl border border-gray-700/50">
-                                    <span className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-1 block">센서</span>
-                                    <span className="text-gray-200">{camera.sensor}</span>
+                                    <span className="text-xs text-gray-500 font-semibold mb-1 block">센서</span>
+                                    <span className="text-sm text-gray-200 font-medium">{camera.sensor}</span>
                                 </div>
                             )}
 
                             {/* 화소수 */}
-                            {(camera.pixels) && (
+                            {camera.pixels && (
                                 <div className="bg-gray-800/50 p-4 rounded-xl border border-gray-700/50">
-                                    <span className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-1 block">화소수</span>
-                                    <span className="text-gray-200">{camera.pixels}</span>
+                                    <span className="text-xs text-gray-500 font-semibold mb-1 block">화소수</span>
+                                    <span className="text-sm text-gray-200 font-medium">{camera.pixels}</span>
+                                </div>
+                            )}
+
+                            {/* 렌즈 마운트 (새로 추가) */}
+                            {camera.mount && (
+                                <div className="bg-gray-800/50 p-4 rounded-xl border border-gray-700/50">
+                                    <span className="text-xs text-gray-500 font-semibold mb-1 block">렌즈 마운트</span>
+                                    <span className="text-sm text-blue-400 font-medium">{camera.mount}</span>
+                                </div>
+                            )}
+
+                            {/* 손떨림 보정 (새로 추가) */}
+                            {camera.stabilization && (
+                                <div className="bg-gray-800/50 p-4 rounded-xl border border-gray-700/50">
+                                    <span className="text-xs text-gray-500 font-semibold mb-1 block">손떨림 보정</span>
+                                    <span className="text-sm text-gray-200 font-medium">{camera.stabilization}</span>
+                                </div>
+                            )}
+
+                            {/* 디스플레이 (새로 추가) */}
+                            {camera.display && (
+                                <div className="bg-gray-800/50 p-4 rounded-xl border border-gray-700/50">
+                                    <span className="text-xs text-gray-500 font-semibold mb-1 block">디스플레이</span>
+                                    <span className="text-sm text-gray-200 font-medium">{camera.display}</span>
+                                </div>
+                            )}
+
+                            {/* 연사 속도 (새로 추가) */}
+                            {camera.fps && (
+                                <div className="bg-gray-800/50 p-4 rounded-xl border border-gray-700/50">
+                                    <span className="text-xs text-gray-500 font-semibold mb-1 block">연사 속도</span>
+                                    <span className="text-sm text-gray-200 font-medium">{camera.fps}</span>
                                 </div>
                             )}
 
                             {/* 동영상 */}
-                            {(camera.video) && (
+                            {camera.video && (
                                 <div className="bg-gray-800/50 p-4 rounded-xl border border-gray-700/50">
-                                    <span className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-1 block">동영상</span>
-                                    <span className="text-gray-200">{camera.video}</span>
+                                    <span className="text-xs text-gray-500 font-semibold mb-1 block">동영상</span>
+                                    <span className="text-sm text-gray-200 font-medium">{camera.video}</span>
                                 </div>
                             )}
 
                             {/* 무게 */}
-                            {(camera.weight) && (
+                            {camera.weight && (
                                 <div className="bg-gray-800/50 p-4 rounded-xl border border-gray-700/50">
-                                    <span className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-1 block">무게</span>
-                                    <span className="text-gray-200">{camera.weight}</span>
+                                    <span className="text-xs text-gray-500 font-semibold mb-1 block">무게</span>
+                                    <span className="text-sm text-gray-200 font-medium">{camera.weight}</span>
                                 </div>
                             )}
 
