@@ -69,6 +69,46 @@ export default async function BodyDetailPage(props: { params: Promise<{ id: stri
                             </p>
                         </div>
                     </div>
+
+                    {/* 👇 여기서부터 새로 추가하는 '주요 스펙' 영역입니다 👇 */}
+                    <div className="mt-8 pt-8 border-t border-gray-800">
+                        <h3 className="text-lg font-bold text-white mb-6">주요 스펙</h3>
+                        <div className="grid grid-cols-2 gap-4">
+
+                            {/* 센서 */}
+                            {(camera.sensor) && (
+                                <div className="bg-gray-800/50 p-4 rounded-xl border border-gray-700/50">
+                                    <span className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-1 block">센서</span>
+                                    <span className="text-gray-200">{camera.sensor}</span>
+                                </div>
+                            )}
+
+                            {/* 화소수 */}
+                            {(camera.pixels) && (
+                                <div className="bg-gray-800/50 p-4 rounded-xl border border-gray-700/50">
+                                    <span className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-1 block">화소수</span>
+                                    <span className="text-gray-200">{camera.pixels}</span>
+                                </div>
+                            )}
+
+                            {/* 동영상 */}
+                            {(camera.video) && (
+                                <div className="bg-gray-800/50 p-4 rounded-xl border border-gray-700/50">
+                                    <span className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-1 block">동영상</span>
+                                    <span className="text-gray-200">{camera.video}</span>
+                                </div>
+                            )}
+
+                            {/* 무게 */}
+                            {(camera.weight) && (
+                                <div className="bg-gray-800/50 p-4 rounded-xl border border-gray-700/50">
+                                    <span className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-1 block">무게</span>
+                                    <span className="text-gray-200">{camera.weight}</span>
+                                </div>
+                            )}
+
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
