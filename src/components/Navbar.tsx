@@ -18,14 +18,14 @@ export default function Navbar() {
         <nav className="border-b border-gray-800 bg-[#121212]/80 backdrop-blur-md sticky top-0 z-50">
             <div className="container mx-auto px-6 max-w-7xl h-16 flex items-center justify-between">
 
-                {/* 로고 */}
+                {/* 🎯 로고 (클릭 시 홈으로 이동!) */}
                 <Link href="/" className="text-xl font-black text-white tracking-tighter hover:text-blue-400 transition-colors">
                     CAMERA HUB
                 </Link>
 
-                {/* 메인 메뉴 */}
+                {/* 🎯 메인 메뉴 ('홈' 삭제, '뉴스' 독립) */}
                 <div className="hidden md:flex items-center space-x-8 text-sm font-bold text-gray-300">
-                    <Link href="/" className="hover:text-white transition-colors">홈/뉴스</Link>
+                    <Link href="/news" className="hover:text-white transition-colors">뉴스</Link>
                     <Link href="/bodies" className="hover:text-white transition-colors">바디</Link>
                     <Link href="/lenses" className="hover:text-white transition-colors">렌즈</Link>
                     <Link href="/lectures" className="hover:text-white transition-colors">사진 강의</Link>
