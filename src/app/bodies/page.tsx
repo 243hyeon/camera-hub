@@ -186,8 +186,14 @@ export default function BodiesPage() {
 
             {/* 🎯 2. 스펙 비교 모달 창 (팝업) */}
             {isCompareModalOpen && (
-                <div className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
-                    <div className="bg-[#1c1c1c] w-full max-w-6xl max-h-[90vh] overflow-y-auto rounded-3xl border border-gray-700 shadow-2xl custom-scrollbar">
+                <div
+                    className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4 backdrop-blur-sm"
+                    onClick={() => setIsCompareModalOpen(false)} /* 👈 1. 추가: 어두운 바깥 배경을 클릭하면 창을 닫습니다! */
+                >
+                    <div
+                        className="bg-[#1c1c1c] w-full max-w-6xl max-h-[90vh] overflow-y-auto rounded-3xl border border-gray-700 shadow-2xl custom-scrollbar"
+                        onClick={(e) => e.stopPropagation()} /* 👈 2. 추가: 하지만 창 '안쪽'을 클릭했을 땐 안 닫히게(클릭이 새어나가지 않게) 방어합니다! */
+                    >
 
                         <div className="sticky top-0 bg-[#1c1c1c] p-6 border-b border-gray-800 flex justify-between items-center z-10">
                             <h2 className="text-2xl font-extrabold text-white">🔥 카메라 스펙 정밀 비교</h2>
