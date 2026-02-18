@@ -8,9 +8,9 @@ export default function BodiesPage() {
     const [cameras, setCameras] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
 
-    // 필터 상태
-    const [selectedBrand, setSelectedBrand] = useState('All');
-    const [selectedLevel, setSelectedLevel] = useState('All');
+    // 🎯 2단 다중 필터 상태 (배열로 변경하여 중복 선택 지원!)
+    const [selectedBrands, setSelectedBrands] = useState<string[]>([]);
+    const [selectedLevels, setSelectedLevels] = useState<string[]>([]);
 
     // 🎯 비교 기능 상태 (선택된 카메라 목록, 모달 창 열림 여부)
     const [compareList, setCompareList] = useState<any[]>([]);
@@ -25,11 +25,24 @@ export default function BodiesPage() {
         fetchCameras();
     }, []);
 
+    // 필터 토글 함수
+    const toggleFilter = (currentList: string[], value: string, setter: (val: string[]) => void) => {
+        if (value === 'All') {
+            setter([]); // '전체' 클릭 시 초기화
+        } else {
+            if (currentList.includes(value)) {
+                setter(currentList.filter(item => item !== value)); // 이미 있으면 제거
+            } else {
+                setter([...currentList, value]); // 없으면 추가
+            }
+        }
+    };
+
+    // 🎯 2단 필터링 로직 (중복 선택 지원 버전)
     const filteredCameras = cameras.filter((camera) => {
-        const matchBrand = selectedBrand === 'All' || camera.brand === selectedBrand;
-        // 'level' 또는 'tier' 컬럼을 모두 지원하도록 합니다.
+        const matchBrand = selectedBrands.length === 0 || selectedBrands.includes(camera.brand);
         const cameraLevel = camera.level || camera.tier || '미정';
-        const matchLevel = selectedLevel === 'All' || cameraLevel === selectedLevel;
+        const matchLevel = selectedLevels.length === 0 || selectedLevels.includes(cameraLevel);
         return matchBrand && matchLevel;
     });
 
@@ -64,32 +77,41 @@ export default function BodiesPage() {
                 <p className="text-gray-400">시장을 선도하는 주요 브랜드의 미러리스 & DSLR 라인업 (실시간 데이터베이스 연동)</p>
             </div>
 
-            {/* 필터 버튼 영역 */}
+            {/* 👇 2단 정밀 필터 영역 (중복 선택 지원!) 👇 */}
             <div className="mb-8 space-y-4 bg-[#1c1c1c] p-6 rounded-2xl border border-gray-800">
                 <div className="flex items-center flex-wrap gap-3">
                     <span className="text-gray-500 font-bold text-sm mr-2 w-16">브랜드</span>
-                    {/* 사용자 요청에 따른 브랜드 순서: Canon, Nikon, Sony */}
-                    {['All', 'Canon', 'Nikon', 'Sony'].map((brand) => (
+                    <button
+                        onClick={() => toggleFilter(selectedBrands, 'All', setSelectedBrands)}
+                        className={`px-5 py-2 rounded-full text-sm font-bold transition-all duration-300 ${selectedBrands.length === 0 ? 'bg-white text-black shadow-lg scale-105' : 'bg-gray-800 text-gray-400 hover:bg-gray-700 hover:text-white'}`}
+                    >
+                        전체 보기
+                    </button>
+                    {['Canon', 'Nikon', 'Sony'].map((brand) => (
                         <button
                             key={brand}
-                            onClick={() => setSelectedBrand(brand)}
-                            className={`px-5 py-2 rounded-full text-sm font-bold transition-all duration-300 ${selectedBrand === brand ? 'bg-white text-black shadow-lg scale-105' : 'bg-gray-800 text-gray-400 hover:bg-gray-700 hover:text-white'
-                                }`}
+                            onClick={() => toggleFilter(selectedBrands, brand, setSelectedBrands)}
+                            className={`px-5 py-2 rounded-full text-sm font-bold transition-all duration-300 ${selectedBrands.includes(brand) ? 'bg-white text-black shadow-lg scale-105' : 'bg-gray-800 text-gray-400 hover:bg-gray-700 hover:text-white'}`}
                         >
-                            {brand === 'All' ? '전체 보기' : brand}
+                            {brand}
                         </button>
                     ))}
                 </div>
                 <div className="flex items-center flex-wrap gap-3">
                     <span className="text-gray-500 font-bold text-sm mr-2 w-16">등급</span>
-                    {['All', '보급기', '중급기', '상급기'].map((level) => (
+                    <button
+                        onClick={() => toggleFilter(selectedLevels, 'All', setSelectedLevels)}
+                        className={`px-5 py-2 rounded-full text-sm font-bold transition-all duration-300 ${selectedLevels.length === 0 ? 'bg-blue-600 text-white shadow-[0_0_15px_rgba(37,99,235,0.5)] scale-105' : 'bg-gray-800 text-gray-400 hover:bg-gray-700 hover:text-white'}`}
+                    >
+                        모든 등급
+                    </button>
+                    {['보급기', '중급기', '상급기'].map((level) => (
                         <button
                             key={level}
-                            onClick={() => setSelectedLevel(level)}
-                            className={`px-5 py-2 rounded-full text-sm font-bold transition-all duration-300 ${selectedLevel === level ? 'bg-blue-600 text-white shadow-[0_0_15px_rgba(37,99,235,0.5)] scale-105' : 'bg-gray-800 text-gray-400 hover:bg-gray-700 hover:text-white'
-                                }`}
+                            onClick={() => toggleFilter(selectedLevels, level, setSelectedLevels)}
+                            className={`px-5 py-2 rounded-full text-sm font-bold transition-all duration-300 ${selectedLevels.includes(level) ? 'bg-blue-600 text-white shadow-[0_0_15px_rgba(37,99,235,0.5)] scale-105' : 'bg-gray-800 text-gray-400 hover:bg-gray-700 hover:text-white'}`}
                         >
-                            {level === 'All' ? '모든 등급' : level}
+                            {level}
                         </button>
                     ))}
                 </div>
