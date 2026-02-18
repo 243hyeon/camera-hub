@@ -58,20 +58,20 @@ export default async function BodiesPage() {
                                 {camera.description || '제품 설명이 준비 중입니다.'}
                             </CardDescription>
 
-                            {/* 핵심 스펙 태그 영역 */}
+                            {/* 가독성을 확 높인 핵심 스펙 태그 영역 */}
                             <div className="flex flex-wrap gap-2 mt-4">
                                 {camera.sensor && (
-                                    <span className="bg-gray-800 text-gray-300 text-[10px] px-2.5 py-1 rounded-md border border-gray-700/50 font-bold uppercase tracking-tight flex items-center">
+                                    <span className="bg-gray-800 text-gray-200 text-sm font-medium px-3 py-1.5 rounded-lg border border-gray-600 shadow-sm flex items-center">
                                         {camera.sensor}
                                     </span>
                                 )}
                                 {camera.pixels && (
-                                    <span className="bg-gray-800 text-gray-300 text-[10px] px-2.5 py-1 rounded-md border border-gray-700/50 font-bold uppercase tracking-tight flex items-center">
+                                    <span className="bg-gray-800 text-gray-200 text-sm font-medium px-3 py-1.5 rounded-lg border border-gray-600 shadow-sm flex items-center">
                                         {camera.pixels} 화소
                                     </span>
                                 )}
                                 {camera.video && (
-                                    <span className="bg-gray-800 text-gray-300 text-[10px] px-2.5 py-1 rounded-md border border-gray-700/50 font-bold uppercase tracking-tight flex items-center">
+                                    <span className="bg-gray-800 text-gray-200 text-sm font-medium px-3 py-1.5 rounded-lg border border-gray-600 shadow-sm flex items-center">
                                         {camera.video}
                                     </span>
                                 )}
