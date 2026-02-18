@@ -1,129 +1,114 @@
-import Link from 'next/link'
-import { getLatestNews } from '@/lib/fetchNews' // <-- 여기 변경됨!
-import { dummyCameras } from '@/data/cameras'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
-import NewsImage from '@/components/NewsImage'
+import Link from 'next/link';
 
-// 메인 페이지를 async로 변경 (데이터를 기다려야 하니까요)
-export default async function Home() {
-  // 실시간 뉴스 가져오기 (최대 3개)
-  const latestNews = await getLatestNews();
-  const featuredNews = latestNews.slice(0, 3);
+// 📡 PetaPixel(글로벌 1위 카메라 매체)의 실시간 뉴스를 가져오는 마법의 함수!
+async function getGlobalCameraNews() {
+  try {
+    // rss2json이라는 무료 변환기를 통해 RSS(뉴스 피드)를 다루기 쉬운 데이터로 바꿔 가져옵니다.
+    // { next: { revalidate: 3600 } } 코드는 1시간(3600초)마다 새로운 뉴스를 갱신하라는 뜻입니다.
+    const res = await fetch('https://api.rss2json.com/v1/api.json?rss_url=https://petapixel.com/feed/', {
+      next: { revalidate: 3600 }
+    });
+    const data = await res.json();
+    return data.items.slice(0, 3); // 가장 최신 기사 딱 3개만 자릅니다.
+  } catch (error) {
+    console.error('뉴스 연동 실패:', error);
+    return []; // 실패 시 빈 배열 반환
+  }
+}
 
-  // 인기 카메라 (기존 데이터 유지)
-  const featuredCameras = dummyCameras.slice(0, 3);
+export default async function HomePage() {
+  // 컴포넌트가 렌더링될 때 실시간 뉴스를 가져옵니다.
+  const newsItems = await getGlobalCameraNews();
 
   return (
-    <main className="min-h-screen bg-black text-white">
-      {/* Hero Section */}
-      <section className="relative h-[500px] flex items-center justify-center bg-gradient-to-b from-zinc-900 to-black overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-transparent to-black opacity-40"></div>
-        <div className="relative z-10 text-center px-4 animate-fade-in-up">
-          <Badge variant="secondary" className="mb-4">Next-Gen Camera Archive</Badge>
-          <h1 className="text-5xl md:text-7xl font-extrabold mb-6 tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-white to-zinc-500">
-            당신의 완벽한 <br />
+    <div className="flex flex-col items-center relative overflow-hidden pb-32">
+
+      {/* 🌟 상단: 히어로(메인 대문) 영역 */}
+      <div className="min-h-[80vh] flex flex-col items-center justify-center relative w-full pt-10">
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-blue-900/20 rounded-full blur-[120px] -z-10 pointer-events-none"></div>
+
+        <div className="text-center z-10 px-4 mb-16 animate-fade-in-up">
+          <h2 className="text-gray-400 font-bold tracking-[0.2em] text-xs md:text-sm mb-6 uppercase border border-gray-800 rounded-full px-4 py-1.5 inline-block bg-[#1c1c1c]">
+            Next-Gen Camera Archive
+          </h2>
+          <h1 className="text-5xl md:text-7xl font-extrabold text-white tracking-tight mb-8 leading-tight">
+            당신의 완벽한 <br className="hidden md:block" />
             카메라를 찾으세요
           </h1>
-          <p className="text-xl text-zinc-400 mb-8 max-w-2xl mx-auto">
+          <p className="text-gray-400 text-lg md:text-xl max-w-2xl mx-auto font-medium break-keep mb-10">
             최신 미러리스 바디부터 최상급 렌즈 성능까지, <br />
             전문가급 데이터베이스와 AI 가이드가 당신의 선택을 도와드립니다.
           </p>
-          <div className="flex gap-4 justify-center">
-            <Link href="/ai-guide">
-              <Button size="lg" className="bg-white text-black hover:bg-zinc-200 text-lg px-8 py-6 rounded-full font-bold">
-                AI 가이드에게 물어보기
-              </Button>
+
+          <div className="flex flex-wrap items-center justify-center gap-4">
+            <Link href="/bodies" className="px-8 py-3.5 rounded-full bg-white text-black font-extrabold text-lg hover:bg-gray-200 transition-colors shadow-lg shadow-white/10">
+              카메라 둘러보기
             </Link>
-            <Link href="/bodies">
-              <Button variant="outline" size="lg" className="text-lg px-8 py-6 rounded-full border-zinc-700 hover:bg-zinc-800 text-white">
-                카메라 둘러보기
-              </Button>
+            <Link href="/lenses" className="px-8 py-3.5 rounded-full bg-[#1c1c1c] text-white border border-gray-700 font-extrabold text-lg hover:bg-gray-800 transition-colors">
+              렌즈 대백과 보기
             </Link>
           </div>
         </div>
-      </section>
+      </div>
 
-      {/* Latest News Section (RSS 연동) */}
-      <section className="container mx-auto py-20 px-4">
-        <div className="flex justify-between items-end mb-10">
+      {/* 📰 하단: 실시간 뉴스 자동화 영역 */}
+      <div className="w-full max-w-7xl px-6 z-10 animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
+        <div className="flex items-end justify-between mb-8 border-b border-gray-800 pb-4">
           <div>
-            <div className="flex items-center gap-2 text-yellow-500 mb-2 font-medium">
-              <span className="animate-pulse">⚡</span> LATEST UPDATES
-            </div>
-            <h2 className="text-4xl font-bold">최신 뉴스</h2>
+            <span className="text-yellow-500 font-bold text-xs tracking-wider uppercase mb-1 block flex items-center gap-1">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+              Latest Updates
+            </span>
+            <h2 className="text-3xl font-extrabold text-white">글로벌 최신 뉴스</h2>
           </div>
-          <Link href="/news" className="text-zinc-400 hover:text-white flex items-center gap-1 transition-colors">
-            전체보기 →
-          </Link>
+          <a href="https://petapixel.com" target="_blank" rel="noreferrer" className="text-sm text-gray-400 hover:text-white transition-colors flex items-center gap-1">
+            PetaPixel 전체보기 <span className="text-lg">→</span>
+          </a>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {featuredNews.map((news) => (
-            <a
-              key={news.title}
-              href={news.link}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="group block"
-            >
-              <Card className="bg-zinc-900 border-zinc-800 overflow-hidden h-full hover:border-zinc-600 transition-all duration-300 group-hover:transform group-hover:-translate-y-1 rounded-3xl">
-                <div className="aspect-video relative overflow-hidden bg-zinc-800">
-                  <NewsImage
-                    src={news.thumbnail}
-                    alt={news.title}
-                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                  />
-                  <Badge className="absolute top-4 left-4 bg-white/10 backdrop-blur-md text-white border-none hover:bg-white/20">
-                    {news.source || 'NEWS'}
-                  </Badge>
-                </div>
-                <CardHeader>
-                  <CardTitle className="line-clamp-2 text-white group-hover:text-blue-400 transition-colors">
-                    {news.title}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-zinc-400 text-sm line-clamp-3">
-                    {news.contentSnippet}
-                  </p>
-                </CardContent>
-                <CardFooter className="text-zinc-500 text-xs mt-auto border-t border-zinc-800 pt-4">
-                  {news.pubDate}
-                </CardFooter>
-              </Card>
-            </a>
-          ))}
-        </div>
-      </section>
+          {newsItems.length > 0 ? (
+            newsItems.map((news: any, index: number) => {
+              // HTML 태그가 섞인 내용에서 순수 텍스트만 뽑아내기 위한 처리
+              const cleanDescription = news.description.replace(/<[^>]+>/g, '').slice(0, 100) + '...';
+              // 날짜 포맷팅 (YYYY. MM. DD.)
+              const pubDate = new Date(news.pubDate).toLocaleDateString('ko-KR');
 
-      {/* Insight Focus Section */}
-      <section className="bg-zinc-900 py-20 border-y border-zinc-800">
-        <div className="container mx-auto px-4">
-          <h2 className="text-3xl font-bold mb-8 text-center">Market Insight</h2>
-          <div className="max-w-4xl mx-auto bg-black border border-zinc-800 rounded-2xl p-8 md:p-12 relative overflow-hidden">
-            <div className="absolute top-0 right-0 p-8 opacity-10 font-black text-9xl text-white select-none pointer-events-none">
-              ISSUE
+              return (
+                <a key={index} href={news.link} target="_blank" rel="noreferrer" className="bg-[#1c1c1c] border border-gray-800 rounded-3xl overflow-hidden hover:border-blue-500/50 transition-all duration-300 group flex flex-col h-full hover:-translate-y-1 shadow-lg">
+                  {/* 뉴스 썸네일 */}
+                  <div className="h-48 overflow-hidden relative bg-gray-900">
+                    <span className="absolute top-3 left-3 bg-black/60 backdrop-blur-md text-white text-xs font-bold px-2 py-1 rounded z-10">PetaPixel</span>
+                    <img
+                      src={news.thumbnail || 'https://placehold.co/600x400/1f2937/ffffff.png?text=Camera+News'}
+                      alt="News Thumbnail"
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    />
+                  </div>
+
+                  {/* 뉴스 텍스트 */}
+                  <div className="p-6 flex flex-col flex-grow">
+                    <h3 className="text-lg font-extrabold text-white leading-snug mb-3 line-clamp-2 group-hover:text-blue-400 transition-colors">
+                      {news.title}
+                    </h3>
+                    <p className="text-sm text-gray-400 mb-6 line-clamp-3 leading-relaxed flex-grow">
+                      {cleanDescription}
+                    </p>
+                    <div className="text-xs text-gray-500 font-medium">
+                      {pubDate}
+                    </div>
+                  </div>
+                </a>
+              );
+            })
+          ) : (
+            <div className="col-span-3 text-center py-20 text-gray-500 bg-[#1c1c1c] rounded-3xl border border-gray-800">
+              현재 뉴스를 불러오고 있습니다... 📡
             </div>
-            <div className="relative z-10">
-              <Badge variant="outline" className="text-blue-400 border-blue-400 mb-4">Focus</Badge>
-              <h3 className="text-3xl md:text-4xl font-bold mb-6 text-white">
-                2026년 카메라 시장 트렌드
-              </h3>
-              <p className="text-xl text-zinc-300 mb-8 leading-relaxed">
-                AI 기술이 탑재된 AF 시스템과 글로벌 셔터의 대중화가 시작되었습니다.
-                이제 사진가는 '초점'보다 '순간'에 더 집중할 수 있는 시대가 열렸습니다.
-              </p>
-              <Link href="/news">
-                <Button variant="secondary" size="lg" className="rounded-full">
-                  리포트 자세히 보기 →
-                </Button>
-              </Link>
-            </div>
-          </div>
+          )}
         </div>
-      </section>
-    </main>
-  )
+      </div>
+
+    </div>
+  );
 }

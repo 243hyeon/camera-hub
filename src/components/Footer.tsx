@@ -1,53 +1,49 @@
-import Link from 'next/link'
+import Link from 'next/link';
 
-const Footer = () => {
+export default function Footer() {
     return (
-        <footer className="border-t bg-muted/20 mt-20">
-            <div className="container mx-auto px-4 py-12">
-                <div className="flex flex-col md:flex-row justify-between items-start gap-8">
-                    <div className="space-y-4">
-                        <Link href="/" className="text-xl font-bold tracking-tighter">
-                            CAMERA HUB
-                        </Link>
-                        <p className="text-sm text-muted-foreground max-w-xs">
-                            실제 AI 기술과 방대한 데이터베이스를 통해 최적의 카메라 장비를 제안하는 프리미엄 아카이브 플랫폼입니다.
+        <footer className="border-t border-gray-800 bg-[#121212] pt-16 pb-8 mt-20 text-white">
+            <div className="container mx-auto px-6 max-w-7xl">
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
+
+                    {/* 왼쪽 로고 및 설명 */}
+                    <div className="col-span-1 md:col-span-2">
+                        <h2 className="text-2xl font-black text-white mb-4 tracking-tight">CAMERA HUB</h2>
+                        <p className="text-gray-400 leading-relaxed max-w-sm break-keep">
+                            실제 AI 기술과 방대한 데이터베이스를 통해<br />
+                            나에게 꼭 맞는 최적의 카메라 장비를 찾아주는<br />
+                            프리미엄 아카이브 플랫폼입니다.
                         </p>
                     </div>
 
-                    <div className="grid grid-cols-2 shadow-none sm:grid-cols-3 gap-12">
-                        <div className="space-y-4">
-                            <h3 className="text-sm font-bold uppercase tracking-widest text-foreground">Menu</h3>
-                            <ul className="space-y-2 text-sm text-muted-foreground">
-                                <li><Link href="/news" className="hover:text-primary">최신 뉴스</Link></li>
-                                <li><Link href="/bodies" className="hover:text-primary">카메라 바디</Link></li>
-                                <li><Link href="/lenses" className="hover:text-primary">렌즈 DB</Link></li>
-                            </ul>
-                        </div>
-                        <div className="space-y-4">
-                            <h3 className="text-sm font-bold uppercase tracking-widest text-foreground">Community</h3>
-                            <ul className="space-y-2 text-sm text-muted-foreground">
-                                <li><Link href="/community" className="hover:text-primary">자유 게시판</Link></li>
-                                <li><Link href="/lectures" className="hover:text-primary">사진 강의</Link></li>
-                                <li><Link href="/ai-guide" className="hover:text-primary">AI 가이드</Link></li>
-                            </ul>
-                        </div>
-                        <div className="space-y-4">
-                            <h3 className="text-sm font-bold uppercase tracking-widest text-foreground">Legal</h3>
-                            <ul className="space-y-2 text-sm text-muted-foreground">
-                                <li><Link href="/privacy" className="hover:text-primary">개인정보처리방침</Link></li>
-                                <li><Link href="/terms" className="hover:text-primary">이용약관</Link></li>
-                            </ul>
-                        </div>
+                    {/* 중앙 메뉴 1 */}
+                    <div>
+                        <h3 className="text-white font-bold mb-4 tracking-widest text-sm uppercase">탐색 메뉴</h3>
+                        <ul className="space-y-3 text-gray-400 text-sm font-medium">
+                            <li><Link href="/" className="hover:text-blue-400 transition-colors">실시간 뉴스</Link></li>
+                            <li><Link href="/bodies" className="hover:text-blue-400 transition-colors">카메라 바디</Link></li>
+                            <li><Link href="/lenses" className="hover:text-blue-400 transition-colors">렌즈 대백과</Link></li>
+                        </ul>
                     </div>
+
+                    {/* 중앙 메뉴 2 (커뮤니티 & 법적고지 합침) */}
+                    <div>
+                        <h3 className="text-white font-bold mb-4 tracking-widest text-sm uppercase">커뮤니티 & 지원</h3>
+                        <ul className="space-y-3 text-gray-400 text-sm font-medium">
+                            <li><Link href="/lectures" className="hover:text-blue-400 transition-colors">사진 강의</Link></li>
+                            <li><Link href="/board" className="hover:text-blue-400 transition-colors">자유 게시판</Link></li>
+                            <li><a href="#" className="hover:text-blue-400 transition-colors">이용약관 및 개인정보처리방침</a></li>
+                        </ul>
+                    </div>
+
                 </div>
 
-                <div className="border-t mt-12 pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-muted-foreground">
-                    <p>© 2024 Camera Hub Academy. All rights reserved.</p>
-                    <p>Designed for Professional Photographers</p>
+                {/* 하단 카피라이트 */}
+                <div className="border-t border-gray-800 pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-gray-500 font-medium">
+                    <p>© 2026 Camera Hub Academy. All rights reserved.</p>
+                    <p>사진을 사랑하는 모든 분들을 위한 프리미엄 가이드</p>
                 </div>
             </div>
         </footer>
-    )
+    );
 }
-
-export default Footer
