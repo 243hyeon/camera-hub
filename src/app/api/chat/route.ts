@@ -3,72 +3,57 @@ import { NextResponse } from "next/server";
 
 export async function POST(req: Request) {
     try {
-        // 1. API 키 검증 및 공백 제거 (Trim)
         const apiKey = process.env.GOOGLE_GEMINI_API_KEY?.trim();
 
         if (!apiKey) {
-            console.error("❌ [Server Error] API Key is missing or empty.");
+            console.error("❌ [Server Error] API Key is missing.");
             return NextResponse.json(
-                { error: "Server Configuration Error: API Key missing" },
+                { error: "AI 설정이 완료되지 않았습니다. 관리자에게 문의하세요." },
                 { status: 500 }
             );
         }
 
-        // 2. 요청 데이터 파싱
         const body = await req.json();
-        const { messages } = body;
+        const { messages, lang } = body;
         const lastMessage = messages[messages.length - 1].content;
 
-        // 3. Gemini 모델 초기화
         const genAI = new GoogleGenerativeAI(apiKey);
 
         const systemInstruction = `
-            당신은 20년 경력의 베테랑 카메라 전문가입니다.
+            당신은 'Camera Hub'의 수석 큐레이터이자 카메라 전문가입니다.
             사용자의 질문에 대해 다음과 같은 **엄격한 원칙**으로 답변하세요:
 
-            1. **결론부터 두괄식으로**: 서론을 빼고 바로 핵심 답변을 제시하세요.
-            2. **비교는 무조건 표(Table)로**: 2개 이상의 제품을 비교할 때는 반드시 마크다운 표를 사용하세요.
-            3. **[중요] 비교 기능 연동**:
-               - 표를 그릴 때 반드시 **'비교하기'** 컬럼을 맨 오른쪽에 추가하세요.
-               - 해당 컬럼에는 **\`[[COMPARE:정확한모델명]]\`** 형식을 입력하세요.
-               - 예시: | 모델명 | 가격 | 비교하기 |
-                       | --- | --- | --- |
-                       | Sony A7 IV | 300만원 | [[COMPARE:α7 IV]] |
-            4. **개조식 서술**: 줄글 대신 글머리 기호(Bullet points)를 적극 사용하여 가독성을 높이세요.
-            5. **핵심 강조**: 중요한 카메라 모델명, 스펙, 장단점은 **굵게(Bold)** 표시하세요.
-            6. **3줄 요약**: 답변 마지막에는 반드시 **'💡 3줄 요약'** 섹션을 추가하세요.
-            7. **최신 정보**: 2024년, 2025년 최신 트렌드를 반영하세요.
+            1. **정체성 유지 (Guardrails)**: 
+               - 오직 카메라, 렌즈, 사진 촬영, 영상 제작 등 **사진/영상 장비 및 기술**에 관련된 질문에만 답변하세요.
+               - 요리, 날씨, 정치, 일반 상식 등 관련 없는 질문에는 "죄송합니다. 저는 Camera Hub의 카메라 전문 가이드라서 그 질문에는 답할 수 없습니다."라고 정중히 거절하세요.
+            2. **결론부터 두괄식으로**: 카메라 모델이나 정보를 물으면 핵심부터 즉시 답변하세요.
+            3. **비교는 표(Table)로**: 2개 이상의 제품 비교 시 반드시 마크다운 표를 사용하세요. 
+               - 표의 맨 오른쪽 컬럼에 '비교하기'를 추가하고 \`[[COMPARE:정확한모델명]]\` 형식을 넣으세요.
+            4. **다국어 대응**: 요청(lang)이 'KR'이면 한국어로, 'EN'이면 영어로 답변하세요.
+            5. **전문성**: 최신 카메라 트렌드(2024-2025)를 반영하여 전문가 수준의 스펙 분석을 제공하세요.
+            6. **3줄 요약**: 답변 끝에 반드시 '💡 3줄 요약' 또는 '💡 3-Line Summary'를 추가하세요.
         `;
 
-        // 🚨 해결책: 목록에 있는 가장 안정적인 최신 모델 'gemini-2.5-flash' 사용
-        const modelName = "gemini-2.5-flash";
+        // 🎯 2.0-flash 모델 사용 (목록에서 확인된 사용 가능한 모델)
         const model = genAI.getGenerativeModel({
-            model: modelName,
+            model: "gemini-2.0-flash",
             systemInstruction: systemInstruction,
         });
 
-        console.log(`🚀 [AI Request] Model: ${modelName}, Message: ${lastMessage.substring(0, 20)}...`);
-
-        // 4. 응답 생성 요청
         const result = await model.generateContent(lastMessage);
         const response = await result.response;
         const text = response.text();
 
-        console.log("✅ [AI Response] Success!");
-
-        return NextResponse.json({ role: 'assistant', content: text });
+        return NextResponse.json({ role: 'ai', content: text });
 
     } catch (error: any) {
         console.error("🚨 [Gemini API Error]", error);
 
-        // 지능형 에러 핸들링
-        if (error.message?.includes("404") || error.message?.includes("Not Found")) {
+        // 할당량 초과 에러 처리
+        if (error.message?.includes("429")) {
             return NextResponse.json(
-                {
-                    error: "AI 모델 연결 실패",
-                    details: "API 키 권한 문제이거나, 해당 모델(gemini-1.5-flash)을 사용할 수 없는 프로젝트입니다. Google AI Studio에서 '새 프로젝트'로 키를 재생성해주세요."
-                },
-                { status: 404 }
+                { error: "AI 서비스 요청 한도가 초과되었습니다. 잠시 후 다시 시도해 주세요." },
+                { status: 429 }
             );
         }
 
