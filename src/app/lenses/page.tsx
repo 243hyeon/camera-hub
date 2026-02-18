@@ -92,7 +92,7 @@ export default function LensesPage() {
                     >
                         전체 보기
                     </button>
-                    {['Sony', 'Canon', 'Nikon'].map((brand) => (
+                    {['Canon', 'Nikon', 'Sony'].map((brand) => (
                         <button
                             key={brand}
                             onClick={() => toggleFilter(selectedBrands, brand, setSelectedBrands)}
