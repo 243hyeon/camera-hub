@@ -3,12 +3,15 @@ import { NextResponse } from "next/server";
 
 export async function POST(req: Request) {
     try {
-        const apiKey = process.env.GOOGLE_GEMINI_API_KEY?.trim();
+        // 1. API 키 우선순위: GOOGLE_GEMINI_API_KEY -> GEMINI_API_KEY
+        const apiKey = (process.env.GOOGLE_GEMINI_API_KEY || process.env.GEMINI_API_KEY)?.trim();
 
-        if (!apiKey) {
-            console.error("❌ [Server Error] API Key is missing.");
+        // 2. 키 부재 또는 플레이스홀더(your_api_key_here) 체크
+        if (!apiKey || apiKey === "your_api_key_here") {
+            const errorReason = !apiKey ? "API Key is missing" : "Placeholder API Key used";
+            console.error(`❌ [Server Error] ${errorReason}`);
             return NextResponse.json(
-                { error: "AI 설정이 완료되지 않았습니다. 관리자에게 문의하세요." },
+                { error: "AI 설정이 완료되지 않았습니다. .env.local 파일에 유효한 API 키를 입력하고 서버를 재시작해 주세요." },
                 { status: 500 }
             );
         }
