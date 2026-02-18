@@ -1,76 +1,82 @@
-import { getLatestNews } from '@/lib/fetchNews' // <-- 교체!
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
-import { ExternalLink } from 'lucide-react'
-import NewsImage from '@/components/NewsImage'
+import Link from 'next/link';
 
-// 1시간마다 페이지 갱신 (ISR) - 옵션
-export const revalidate = 3600;
+// PetaPixel에서 더 많은(12개) 뉴스를 가져옵니다!
+async function getFullGlobalNews() {
+    try {
+        const res = await fetch('https://api.rss2json.com/v1/api.json?rss_url=https://petapixel.com/feed/', {
+            next: { revalidate: 3600 }
+        });
+        const data = await res.json();
+        return data.items.slice(0, 12); // 최신 기사 12개를 가져옵니다.
+    } catch (error) {
+        console.error('뉴스 연동 실패:', error);
+        return [];
+    }
+}
 
 export default async function NewsPage() {
-    const newsList = await getLatestNews();
+    const newsItems = await getFullGlobalNews();
 
     return (
-        <div className="min-h-screen bg-black text-white pt-24 pb-20">
-            <div className="container mx-auto px-4">
-                {/* Header */}
-                <div className="mb-16 text-center">
-                    <h1 className="text-4xl md:text-5xl font-bold mb-6">카메라 뉴스 업데이트</h1>
-                    <p className="text-zinc-400 max-w-2xl mx-auto text-lg">
-                        전 세계 카메라 관련 소식을 실시간으로 모아서 전달해 드립니다. <br />
-                        신제품 발표부터 루머, 펌웨어 업데이트까지 놓치지 마세요.
-                    </p>
+        <div className="container mx-auto p-6 max-w-7xl mt-10 relative pb-32 animate-fade-in-up">
+
+            {/* 타이틀 영역 */}
+            <div className="mb-12 border-b border-gray-800 pb-8 flex flex-col md:flex-row md:items-end justify-between gap-6">
+                <div>
+                    <span className="text-blue-500 font-black tracking-[0.2em] uppercase text-sm mb-2 block">Global Camera Insight</span>
+                    <h1 className="text-4xl md:text-5xl font-extrabold text-white tracking-tight">글로벌 최신 뉴스</h1>
+                    <p className="text-gray-400 mt-4 text-lg">PetaPixel 등 세계 최고의 카메라 매체에서 방금 올라온 소식들을 확인하세요.</p>
                 </div>
 
-                {/* News Grid */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                    {newsList.map((news, index) => (
-                        <Card key={`${news.source}-${index}`} className="bg-zinc-900 border-zinc-800 flex flex-col hover:border-zinc-700 transition-colors group">
-                            {/* Image Section */}
-                            <div className="aspect-[16/9] bg-black relative overflow-hidden rounded-t-xl">
-                                <NewsImage
-                                    src={news.thumbnail}
-                                    alt={news.title}
-                                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 opacity-90 group-hover:opacity-100"
-                                />
-                                <div className="absolute top-4 left-4">
-                                    <Badge variant="secondary" className="backdrop-blur-md bg-black/50 text-white border-zinc-700">
-                                        {news.source || 'Global News'}
-                                    </Badge>
-                                </div>
-                            </div>
-
-                            {/* Content Section */}
-                            <div className="flex-1 flex flex-col p-6">
-                                <div className="flex items-center gap-2 text-xs text-zinc-500 mb-3">
-                                    <span>{news.pubDate}</span>
-                                    <span>•</span>
-                                    <span>{news.source}</span>
-                                </div>
-
-                                <CardTitle className="text-xl mb-3 leading-snug group-hover:text-blue-400 transition-colors">
-                                    {news.title}
-                                </CardTitle>
-
-                                <CardContent className="p-0 mb-6 flex-1">
-                                    <p className="text-zinc-400 text-sm line-clamp-3 leading-relaxed">
-                                        {news.contentSnippet}
-                                    </p>
-                                </CardContent>
-
-                                <CardFooter className="p-0 pt-6 border-t border-zinc-800">
-                                    <Button asChild variant="outline" className="w-full border-zinc-700 hover:bg-zinc-800 hover:text-white group-hover:border-zinc-600">
-                                        <a href={news.link} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-2">
-                                            원문 기사 읽기 <ExternalLink size={16} />
-                                        </a>
-                                    </Button>
-                                </CardFooter>
-                            </div>
-                        </Card>
-                    ))}
+                {/* 추후 번역 API 연동 시 사용할 '자동 번역' UI 디자인 */}
+                <div className="flex items-center gap-3 bg-[#1c1c1c] border border-gray-800 px-5 py-3 rounded-full">
+                    <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
+                    <span className="text-sm font-bold text-gray-300">한국어 AI 번역 준비 중</span>
                 </div>
             </div>
+
+            {/* 뉴스 그리드 (4단으로 시원하게 배치) */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                {newsItems.length > 0 ? (
+                    newsItems.map((news: any, index: number) => {
+                        const cleanDescription = news.description.replace(/<[^>]+>/g, '').slice(0, 90) + '...';
+                        const pubDate = new Date(news.pubDate).toLocaleDateString('ko-KR');
+
+                        return (
+                            <a key={index} href={news.link} target="_blank" rel="noreferrer" className="bg-[#1c1c1c] border border-gray-800 rounded-3xl overflow-hidden hover:border-blue-500/50 transition-all duration-300 group flex flex-col h-full hover:-translate-y-2 shadow-xl">
+                                {/* 썸네일 */}
+                                <div className="h-40 overflow-hidden relative bg-gray-900">
+                                    <span className="absolute top-3 left-3 bg-black/70 backdrop-blur-md text-white text-xs font-bold px-2.5 py-1 rounded z-10 border border-gray-700">PetaPixel</span>
+                                    <img
+                                        src={news.thumbnail || 'https://placehold.co/600x400/1f2937/ffffff.png?text=News'}
+                                        alt="News Thumbnail"
+                                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                                    />
+                                </div>
+
+                                {/* 텍스트 내용 */}
+                                <div className="p-6 flex flex-col flex-grow">
+                                    <h3 className="text-base font-extrabold text-white leading-snug mb-3 line-clamp-3 group-hover:text-blue-400 transition-colors">
+                                        {news.title}
+                                    </h3>
+                                    <p className="text-sm text-gray-400 mb-6 line-clamp-3 leading-relaxed flex-grow">
+                                        {cleanDescription}
+                                    </p>
+                                    <div className="flex items-center justify-between mt-auto pt-4 border-t border-gray-800/50">
+                                        <span className="text-xs text-gray-500 font-medium">{pubDate}</span>
+                                        <span className="text-xs text-blue-500 font-bold group-hover:translate-x-1 transition-transform">원문 보기 →</span>
+                                    </div>
+                                </div>
+                            </a>
+                        );
+                    })
+                ) : (
+                    <div className="col-span-full text-center py-32 text-gray-500 bg-[#1c1c1c] rounded-3xl border border-gray-800 text-lg">
+                        해외 뉴스를 수신하고 있습니다... 📡
+                    </div>
+                )}
+            </div>
+
         </div>
-    )
+    );
 }
