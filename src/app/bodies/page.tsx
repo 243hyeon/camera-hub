@@ -162,6 +162,16 @@ export default function BodiesPage() {
                     </div>
                     <div className="flex items-center gap-4">
                         <span className="text-sm text-gray-400 font-medium"><strong className="text-white">{compareList.length}</strong> / 3 대 선택됨</span>
+
+                        {/* 👇 여기에 '전체 삭제' 버튼이 추가되었습니다! 👇 */}
+                        <button
+                            onClick={() => setCompareList([])}
+                            className="text-sm text-gray-400 hover:text-red-400 transition-colors font-bold underline underline-offset-4 decoration-gray-600 hover:decoration-red-400"
+                        >
+                            전체 삭제
+                        </button>
+                        {/* 👆 여기까지 👆 */}
+
                         <button
                             onClick={() => setIsCompareModalOpen(true)}
                             disabled={compareList.length < 2}
