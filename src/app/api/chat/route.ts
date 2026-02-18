@@ -18,6 +18,15 @@ export async function POST(req: Request) {
 
         const body = await req.json();
         const { messages, lang } = body;
+
+        // 3. 메시지 유효성 체크 (undefined 방지)
+        if (!messages || !Array.isArray(messages) || messages.length === 0) {
+            return NextResponse.json(
+                { error: "잘못된 요청 형식입니다. 메시지 목록이 필요합니다." },
+                { status: 400 }
+            );
+        }
+
         const lastMessage = messages[messages.length - 1].content;
 
         const genAI = new GoogleGenerativeAI(apiKey);

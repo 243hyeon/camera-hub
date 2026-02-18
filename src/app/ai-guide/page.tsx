@@ -1,9 +1,9 @@
 "use client";
 
 import { useState, useRef, useEffect } from 'react';
+import { useAppContext } from '@/components/AppProvider';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-import { useAppContext } from '@/components/AppProvider';
 
 type Message = {
     id: number;
@@ -14,17 +14,24 @@ type Message = {
 export default function AIGuidePage() {
     const { lang } = useAppContext();
     const [input, setInput] = useState('');
-    const [messages, setMessages] = useState<Message[]>([
-        {
-            id: 1,
-            role: 'ai',
-            content: lang === 'KR'
-                ? '안녕하세요! Camera Hub의 수석 큐레이터 AI입니다. 카메라 추천, 렌즈 스펙, 사진 촬영 기법 등 무엇이든 물어보세요! 📸'
-                : 'Hello! I am the Chief Curator AI of Camera Hub. Ask me anything about camera recommendations, lens specs, or photography techniques! 📸'
-        }
-    ]);
+    const [messages, setMessages] = useState<Message[]>([]);
     const [isLoading, setIsLoading] = useState(false);
     const messagesEndRef = useRef<HTMLDivElement>(null);
+
+    // 언어 변경 시 초기 인사말 설정
+    useEffect(() => {
+        if (messages.length === 0) {
+            setMessages([
+                {
+                    id: Date.now(),
+                    role: 'ai',
+                    content: lang === 'KR'
+                        ? '안녕하세요! Camera Hub의 수석 큐레이터 AI입니다. 카메라 추천, 렌즈 스펙, 사진 촬영 기법 등 무엇이든 물어보세요! 📸'
+                        : 'Hello! I am the Chief Curator AI of Camera Hub. Ask me anything about camera recommendations, lens specs, or photography techniques! 📸'
+                }
+            ]);
+        }
+    }, [lang, messages.length]);
 
     useEffect(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -36,7 +43,7 @@ export default function AIGuidePage() {
         "✈️ 여행 갈 때 들고 가기 좋은 소니 렌즈 찾아줘",
         "🤔 미러리스와 DSLR의 차이점이 뭐야?"
     ] : [
-        "👶 Recommend a light & fast camera for taking photos of my grandkids",
+        "👶 Recommend a light & fast camera for grandkids",
         "🌸 What lens is good for blurry backgrounds (bokeh)?",
         "✈️ Find me a good Sony lens for travel",
         "🤔 What's the difference between mirrorless and DSLR?"
@@ -73,7 +80,7 @@ export default function AIGuidePage() {
             const aiMsg: Message = {
                 id: Date.now() + 1,
                 role: 'ai',
-                content: data.content
+                content: data.content || data.reply || 'No response content'
             };
 
             setMessages((prev) => [...prev, aiMsg]);
@@ -100,16 +107,16 @@ export default function AIGuidePage() {
     };
 
     return (
-        <div className="container mx-auto p-6 max-w-4xl mt-10 h-[80vh] flex flex-col transition-colors duration-300">
+        <div className="container mx-auto px-4 py-6 max-w-5xl h-[calc(100vh-80px)] min-h-[700px] flex flex-col transition-colors duration-300 animate-in fade-in slide-in-from-bottom-4 duration-1000">
 
-            <div className="mb-6 text-center">
+            <div className="mb-4 text-center">
                 <h1 className="text-3xl md:text-4xl font-extrabold text-gray-900 dark:text-white tracking-tight mb-2">
                     {t.title} <span className="text-blue-500">✨</span>
                 </h1>
                 <p className="text-gray-600 dark:text-gray-400">{t.desc}</p>
             </div>
 
-            <div className="flex flex-wrap justify-center gap-2 mb-6">
+            <div className="flex flex-wrap justify-center gap-2 mb-4">
                 {suggestedQuestions.map((q, idx) => (
                     <button
                         key={idx}
@@ -124,25 +131,40 @@ export default function AIGuidePage() {
 
             <div className="flex-grow bg-white dark:bg-[#1c1c1c] border border-gray-200 dark:border-gray-800 rounded-3xl shadow-lg dark:shadow-none overflow-hidden flex flex-col">
 
-                <div className="flex-grow overflow-y-auto p-6 space-y-6 custom-scrollbar">
+                <div className="flex-grow overflow-y-auto p-4 md:p-6 space-y-6 custom-scrollbar">
                     {messages.map((msg) => (
                         <div key={msg.id} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                            <div className={`max-w-[85%] md:max-w-[80%] rounded-2xl px-5 py-4 text-sm md:text-base leading-relaxed ${msg.role === 'user'
-                                    ? 'bg-blue-600 text-white rounded-tr-sm shadow-md'
-                                    : 'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-tl-sm border border-gray-200 dark:border-gray-700'
-                                }`}>
-                                <div className="prose prose-sm md:prose-base dark:prose-invert max-w-none">
-                                    <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                                        {msg.content}
-                                    </ReactMarkdown>
-                                </div>
+                            <div className={`max-w-[90%] md:max-w-[80%] rounded-2xl px-5 py-4 text-sm md:text-base leading-relaxed ${msg.role === 'user'
+                                ? 'bg-blue-600 text-white rounded-tr-sm shadow-md whitespace-pre-wrap'
+                                : 'bg-gray-50 dark:bg-gray-800/50 text-gray-900 dark:text-gray-100 rounded-tl-sm border border-gray-200 dark:border-gray-700'
+                                } shadow-sm`}>
+                                {msg.role === 'user' ? (
+                                    msg.content
+                                ) : (
+                                    <div className="space-y-4 break-keep markdown-content">
+                                        <ReactMarkdown
+                                            remarkPlugins={[remarkGfm]}
+                                            components={{
+                                                strong: ({ node, ...props }) => <strong className="font-extrabold text-blue-600 dark:text-blue-400" {...props} />,
+                                                table: ({ node, ...props }) => <div className="overflow-x-auto my-4"><table className="w-full text-left border-collapse min-w-full text-sm" {...props} /></div>,
+                                                th: ({ node, ...props }) => <th className="border-b-2 border-gray-300 dark:border-gray-600 px-4 py-3 font-bold bg-gray-100 dark:bg-gray-700/50 whitespace-nowrap" {...props} />,
+                                                td: ({ node, ...props }) => <td className="border-b border-gray-200 dark:border-gray-700/50 px-4 py-3" {...props} />,
+                                                ul: ({ node, ...props }) => <ul className="list-disc pl-5 space-y-1 my-2" {...props} />,
+                                                ol: ({ node, ...props }) => <ol className="list-decimal pl-5 space-y-1 my-2" {...props} />,
+                                                p: ({ node, ...props }) => <p className="m-0 leading-relaxed" {...props} />
+                                            }}
+                                        >
+                                            {msg.content}
+                                        </ReactMarkdown>
+                                    </div>
+                                )}
                             </div>
                         </div>
                     ))}
 
                     {isLoading && (
                         <div className="flex justify-start">
-                            <div className="bg-gray-100 dark:bg-gray-800 rounded-2xl rounded-tl-sm px-5 py-4 flex gap-2 border border-gray-200 dark:border-gray-700">
+                            <div className="bg-gray-50 dark:bg-gray-800/50 rounded-2xl rounded-tl-sm px-5 py-4 flex gap-2 border border-gray-200 dark:border-gray-700">
                                 <span className="w-2 h-2 bg-gray-400 dark:bg-gray-500 rounded-full animate-bounce"></span>
                                 <span className="w-2 h-2 bg-gray-400 dark:bg-gray-500 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></span>
                                 <span className="w-2 h-2 bg-gray-400 dark:bg-gray-500 rounded-full animate-bounce" style={{ animationDelay: '0.4s' }}></span>
@@ -162,7 +184,7 @@ export default function AIGuidePage() {
                             value={input}
                             onChange={(e) => setInput(e.target.value)}
                             placeholder={t.placeholder}
-                            className="flex-grow bg-white dark:bg-[#1c1c1c] border border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white rounded-full pl-6 pr-24 py-3 md:py-4 focus:outline-none focus:border-blue-500 dark:focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all shadow-inner"
+                            className="flex-grow bg-white dark:bg-[#1c1c1c] border border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white rounded-full pl-6 pr-24 py-4 focus:outline-none focus:border-blue-500 dark:focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all shadow-inner"
                             disabled={isLoading}
                         />
                         <button
