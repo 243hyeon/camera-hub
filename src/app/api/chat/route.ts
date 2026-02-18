@@ -37,9 +37,9 @@ export async function POST(req: Request) {
             6. **3줄 요약**: 답변 끝에 반드시 '💡 3줄 요약' 또는 '💡 3-Line Summary'를 추가하세요.
         `;
 
-        // 🎯 2.0-flash 모델 사용 (목록에서 확인된 사용 가능한 모델)
+        // 🎯 무료 티어에서 안정적으로 작동하는 모델 사용
         const model = genAI.getGenerativeModel({
-            model: "gemini-2.0-flash",
+            model: "gemini-flash-latest",
             systemInstruction: systemInstruction,
         });
 
