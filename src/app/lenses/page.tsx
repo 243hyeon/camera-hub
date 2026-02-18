@@ -174,43 +174,42 @@ export default function LensesPage() {
 
                         return (
                             <div key={lens.id} className={`bg-[#1c1c1c] border rounded-2xl overflow-hidden hover:border-gray-500 transition-all duration-300 group flex flex-col h-full ${isComparing ? 'border-blue-500 shadow-[0_0_15px_rgba(59,130,246,0.3)]' : 'border-gray-800'}`}>
-                                <div className="relative h-56 bg-white p-6 flex items-center justify-center overflow-hidden">
-                                    <span className={`absolute top-3 left-3 px-3 py-1 text-xs font-extrabold rounded-full border backdrop-blur-md z-10 ${getLevelColor(lens.level)}`}>
-                                        {lens.level || '상태 미정'}
-                                    </span>
-                                    <img src={lens.image_url} alt={lens.name} className="w-full h-full object-contain group-hover:scale-110 transition-transform duration-500" />
-                                </div>
-
-                                <div className="p-5 flex flex-col flex-grow">
-                                    <span className="text-xs text-blue-500 font-bold tracking-widest uppercase mb-1">{lens.brand}</span>
-                                    <h2 className="text-xl font-extrabold text-white tracking-tight">{lens.name}</h2>
-
-                                    {/* 화각(angle) 배지가 맨 앞에 추가된 스펙 태그 영역 */}
-                                    <div className="flex flex-wrap gap-2 mt-3">
-                                        {lens.angle && <span className="bg-gray-800 text-teal-300 text-xs font-bold px-2.5 py-1 rounded border border-teal-700/50 shadow-sm">{lens.angle}</span>}
-                                        {lens.focal_length && <span className="bg-gray-800 text-gray-200 text-xs font-medium px-2.5 py-1 rounded border border-gray-600 shadow-sm">{lens.focal_length}</span>}
-                                        {lens.aperture && <span className="bg-gray-800 text-yellow-500 text-xs font-bold px-2.5 py-1 rounded border border-yellow-700/50 shadow-sm">{lens.aperture}</span>}
-                                        {lens.lens_type && <span className="bg-gray-800 text-gray-300 text-xs font-medium px-2.5 py-1 rounded border border-gray-600 shadow-sm">{lens.lens_type}</span>}
+                                <Link href={`/lenses/${lens.id}`} className="flex flex-col flex-grow">
+                                    <div className="relative h-56 bg-white p-6 flex items-center justify-center overflow-hidden">
+                                        <span className={`absolute top-3 left-3 px-3 py-1 text-xs font-extrabold rounded-full border backdrop-blur-md z-10 ${getLevelColor(lens.level)}`}>
+                                            {lens.level || '상태 미정'}
+                                        </span>
+                                        <img src={lens.image_url} alt={lens.name} className="w-full h-full object-contain group-hover:scale-110 transition-transform duration-500" />
                                     </div>
 
-                                    <p className="text-sm text-gray-400 mt-4 line-clamp-2 break-keep flex-grow">
-                                        {lens.description}
-                                    </p>
+                                    <div className="p-5 flex flex-col flex-grow">
+                                        <span className="text-xs text-blue-500 font-bold tracking-widest uppercase mb-1">{lens.brand}</span>
+                                        <h2 className="text-xl font-extrabold text-white tracking-tight">{lens.name}</h2>
 
-                                    <div className="mt-5 flex items-end justify-between">
-                                        <p className="text-xl font-bold text-white">
-                                            {lens.price?.toLocaleString()} <span className="text-xs font-normal text-gray-400">원</span>
+                                        {/* 화각(angle) 배지가 맨 앞에 추가된 스펙 태그 영역 */}
+                                        <div className="flex flex-wrap gap-2 mt-3">
+                                            {lens.angle && <span className="bg-gray-800 text-teal-300 text-xs font-bold px-2.5 py-1 rounded border border-teal-700/50 shadow-sm">{lens.angle}</span>}
+                                            {lens.focal_length && <span className="bg-gray-800 text-gray-200 text-xs font-medium px-2.5 py-1 rounded border border-gray-600 shadow-sm">{lens.focal_length}</span>}
+                                            {lens.aperture && <span className="bg-gray-800 text-yellow-500 text-xs font-bold px-2.5 py-1 rounded border border-yellow-700/50 shadow-sm">{lens.aperture}</span>}
+                                            {lens.lens_type && <span className="bg-gray-800 text-gray-300 text-xs font-medium px-2.5 py-1 rounded border border-gray-600 shadow-sm">{lens.lens_type}</span>}
+                                        </div>
+
+                                        <p className="text-sm text-gray-400 mt-4 line-clamp-2 break-keep flex-grow">
+                                            {lens.description}
                                         </p>
-                                    </div>
 
-                                    <div className="mt-4 flex gap-2">
-                                        <button className="flex-1 text-center bg-white text-black py-2 rounded-lg text-sm font-bold hover:bg-gray-200 transition">
-                                            자세히 보기
-                                        </button>
-                                        <button onClick={() => toggleCompare(lens)} className={`px-4 py-2 rounded-lg text-sm font-bold transition border ${isComparing ? 'bg-blue-600 text-white border-blue-600 hover:bg-blue-700' : 'bg-gray-800 text-gray-300 border-gray-700 hover:bg-gray-700'}`}>
-                                            {isComparing ? '비교 취소' : '비교'}
-                                        </button>
+                                        <div className="mt-5 flex items-end justify-between">
+                                            <p className="text-xl font-bold text-white">
+                                                {lens.price?.toLocaleString()} <span className="text-xs font-normal text-gray-400">원</span>
+                                            </p>
+                                        </div>
                                     </div>
+                                </Link>
+
+                                <div className="p-5 pt-0">
+                                    <button onClick={() => toggleCompare(lens)} className={`w-full py-3 rounded-lg text-sm font-bold transition border ${isComparing ? 'bg-blue-600 text-white border-blue-600 hover:bg-blue-700' : 'bg-gray-800 text-gray-300 border-gray-700 hover:bg-gray-700'}`}>
+                                        {isComparing ? '비교 취소' : '비교하기'}
+                                    </button>
                                 </div>
                             </div>
                         );

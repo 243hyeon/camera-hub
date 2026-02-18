@@ -127,40 +127,38 @@ export default function BodiesPage() {
 
                         return (
                             <div key={camera.id} className={`bg-[#1c1c1c] border rounded-2xl overflow-hidden hover:border-gray-500 transition-all duration-300 group flex flex-col h-full ${isComparing ? 'border-blue-500 shadow-[0_0_15px_rgba(59,130,246,0.3)]' : 'border-gray-800'}`}>
-                                <div className="relative h-56 bg-white p-6 flex items-center justify-center overflow-hidden">
-                                    <span className={`absolute top-3 left-3 px-3 py-1 text-xs font-extrabold rounded-full border backdrop-blur-md z-10 ${getLevelColor(camera.level || camera.tier || '미정')}`}>
-                                        {camera.level || camera.tier || '상태 미정'}
-                                    </span>
-                                    <img src={camera.image_url || camera.imageUrl} alt={camera.name || camera.model} className="w-full h-full object-contain group-hover:scale-110 transition-transform duration-500" />
-                                </div>
-
-                                <div className="p-5 flex flex-col flex-grow">
-                                    <span className="text-xs text-blue-500 font-bold tracking-widest uppercase mb-1">{camera.brand}</span>
-                                    <h2 className="text-xl font-extrabold text-white tracking-tight">{camera.name || camera.model}</h2>
-
-                                    <div className="flex flex-wrap gap-2 mt-3">
-                                        {camera.sensor && <span className="bg-gray-800 text-gray-200 text-sm font-medium px-3 py-1.5 rounded-lg border border-gray-600 shadow-sm">{camera.sensor}</span>}
-                                        {camera.pixels && <span className="bg-gray-800 text-gray-200 text-sm font-medium px-3 py-1.5 rounded-lg border border-gray-600 shadow-sm">{camera.pixels} 화소</span>}
+                                <Link href={`/bodies/${camera.id}`} className="flex flex-col flex-grow">
+                                    <div className="relative h-56 bg-white p-6 flex items-center justify-center overflow-hidden">
+                                        <span className={`absolute top-3 left-3 px-3 py-1 text-xs font-extrabold rounded-full border backdrop-blur-md z-10 ${getLevelColor(camera.level || camera.tier || '미정')}`}>
+                                            {camera.level || camera.tier || '상태 미정'}
+                                        </span>
+                                        <img src={camera.image_url || camera.imageUrl} alt={camera.name || camera.model} className="w-full h-full object-contain group-hover:scale-110 transition-transform duration-500" />
                                     </div>
 
-                                    <div className="mt-auto pt-6 flex items-end justify-between">
-                                        <p className="text-xl font-bold text-white">
-                                            {camera.price?.toLocaleString()} <span className="text-xs font-normal text-gray-400">원</span>
-                                        </p>
-                                    </div>
+                                    <div className="p-5 flex flex-col flex-grow">
+                                        <span className="text-xs text-blue-500 font-bold tracking-widest uppercase mb-1">{camera.brand}</span>
+                                        <h2 className="text-xl font-extrabold text-white tracking-tight">{camera.name || camera.model}</h2>
 
-                                    {/* 🎯 버튼 영역 업데이트 */}
-                                    <div className="mt-4 flex gap-2">
-                                        <Link href={`/bodies/${camera.id}`} className="flex-1 text-center bg-white text-black py-2 rounded-lg text-sm font-bold hover:bg-gray-200 transition">
-                                            자세히 보기
-                                        </Link>
-                                        <button
-                                            onClick={() => toggleCompare(camera)}
-                                            className={`px-4 py-2 rounded-lg text-sm font-bold transition border ${isComparing ? 'bg-blue-600 text-white border-blue-600 hover:bg-blue-700' : 'bg-gray-800 text-gray-300 border-gray-700 hover:bg-gray-700'}`}
-                                        >
-                                            {isComparing ? '비교 취소' : '비교'}
-                                        </button>
+                                        <div className="flex flex-wrap gap-2 mt-3">
+                                            {camera.sensor && <span className="bg-gray-800 text-gray-200 text-sm font-medium px-3 py-1.5 rounded-lg border border-gray-600 shadow-sm">{camera.sensor}</span>}
+                                            {camera.pixels && <span className="bg-gray-800 text-gray-200 text-sm font-medium px-3 py-1.5 rounded-lg border border-gray-600 shadow-sm">{camera.pixels} 화소</span>}
+                                        </div>
+
+                                        <div className="mt-auto pt-6 flex items-end justify-between">
+                                            <p className="text-xl font-bold text-white">
+                                                {camera.price?.toLocaleString()} <span className="text-xs font-normal text-gray-400">원</span>
+                                            </p>
+                                        </div>
                                     </div>
+                                </Link>
+
+                                <div className="p-5 pt-0">
+                                    <button
+                                        onClick={() => toggleCompare(camera)}
+                                        className={`w-full py-3 rounded-lg text-sm font-bold transition border ${isComparing ? 'bg-blue-600 text-white border-blue-600 hover:bg-blue-700' : 'bg-gray-800 text-gray-300 border-gray-700 hover:bg-gray-700'}`}
+                                    >
+                                        {isComparing ? '비교 취소' : '비교하기'}
+                                    </button>
                                 </div>
                             </div>
                         );
