@@ -16,7 +16,7 @@ export default function AIGuidePage() {
     const [input, setInput] = useState('');
     const [messages, setMessages] = useState<Message[]>([]);
     const [isLoading, setIsLoading] = useState(false);
-    const messagesEndRef = useRef<HTMLDivElement>(null);
+    const chatContainerRef = useRef<HTMLDivElement>(null);
 
     // 언어 변경 시 초기 인사말 설정
     useEffect(() => {
@@ -34,7 +34,12 @@ export default function AIGuidePage() {
     }, [lang, messages.length]);
 
     useEffect(() => {
-        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+        if (chatContainerRef.current) {
+            chatContainerRef.current.scrollTo({
+                top: chatContainerRef.current.scrollHeight,
+                behavior: 'smooth',
+            });
+        }
     }, [messages]);
 
     const suggestedQuestions = lang === 'KR' ? [
@@ -131,7 +136,7 @@ export default function AIGuidePage() {
 
             <div className="flex-grow bg-white dark:bg-[#1c1c1c] border border-gray-200 dark:border-gray-800 rounded-3xl shadow-lg dark:shadow-none overflow-hidden flex flex-col">
 
-                <div className="flex-grow overflow-y-auto p-4 md:p-6 space-y-6 custom-scrollbar">
+                <div ref={chatContainerRef} className="flex-grow overflow-y-auto p-4 md:p-6 space-y-6 custom-scrollbar">
                     {messages.map((msg) => (
                         <div key={msg.id} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                             <div className={`max-w-[90%] md:max-w-[80%] rounded-2xl px-5 py-4 text-sm md:text-base leading-relaxed ${msg.role === 'user'
@@ -171,7 +176,6 @@ export default function AIGuidePage() {
                             </div>
                         </div>
                     )}
-                    <div ref={messagesEndRef} />
                 </div>
 
                 <div className="p-4 bg-gray-50 dark:bg-[#121212] border-t border-gray-200 dark:border-gray-800">
