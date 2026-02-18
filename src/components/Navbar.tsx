@@ -19,7 +19,6 @@ const Navbar = () => {
         { name: '뉴스', href: '/news' },
         { name: '바디', href: '/bodies' },
         { name: '렌즈', href: '/lenses' },
-        { name: '비교', href: '/compare' },
         { name: '사진 강의', href: '/lectures' },
         { name: '커뮤니티', href: '/community' },
         { name: 'AI 가이드', href: '/ai-guide' },
