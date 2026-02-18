@@ -57,6 +57,26 @@ export default async function BodiesPage() {
                             <CardDescription className="line-clamp-2 mt-2">
                                 {camera.description || '제품 설명이 준비 중입니다.'}
                             </CardDescription>
+
+                            {/* 핵심 스펙 태그 영역 */}
+                            <div className="flex flex-wrap gap-2 mt-4">
+                                {camera.sensor && (
+                                    <span className="bg-gray-800 text-gray-300 text-[10px] px-2.5 py-1 rounded-md border border-gray-700/50 font-bold uppercase tracking-tight flex items-center">
+                                        {camera.sensor}
+                                    </span>
+                                )}
+                                {camera.pixels && (
+                                    <span className="bg-gray-800 text-gray-300 text-[10px] px-2.5 py-1 rounded-md border border-gray-700/50 font-bold uppercase tracking-tight flex items-center">
+                                        {camera.pixels} 화소
+                                    </span>
+                                )}
+                                {camera.video && (
+                                    <span className="bg-gray-800 text-gray-300 text-[10px] px-2.5 py-1 rounded-md border border-gray-700/50 font-bold uppercase tracking-tight flex items-center">
+                                        {camera.video}
+                                    </span>
+                                )}
+                            </div>
+
                             <div className="mt-4 flex items-baseline gap-1">
                                 <span className="text-2xl font-black text-primary">
                                     {(camera.price || camera.specs?.price || 0).toLocaleString()}
