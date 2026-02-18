@@ -5,7 +5,7 @@ import { Suspense } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import ComparisonBar from "@/components/ComparisonBar";
-import { ThemeProvider } from "@/components/theme-provider";
+import { AppProvider } from "@/components/AppProvider";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -24,16 +24,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ko" suppressHydrationWarning>
-      <body
-        className={`${inter.variable} font-sans antialiased min-h-screen flex flex-col`}
-        suppressHydrationWarning
-      >
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="system"
-          enableSystem
-          disableTransitionOnChange
-        >
+      {/* 라이트모드는 밝은 배경(bg-gray-50), 다크모드는 어두운 배경(dark:bg-[#121212]) */}
+      <body className={`${inter.variable} font-sans antialiased min-h-screen flex flex-col bg-gray-50 dark:bg-[#121212] transition-colors duration-300`}>
+        <AppProvider>
           <Suspense fallback={null}>
             <Navbar />
           </Suspense>
@@ -42,7 +35,7 @@ export default function RootLayout({
           </div>
           <ComparisonBar />
           <Footer />
-        </ThemeProvider>
+        </AppProvider>
       </body>
     </html>
   );
