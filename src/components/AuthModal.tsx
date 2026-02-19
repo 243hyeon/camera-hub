@@ -1,14 +1,28 @@
 "use client";
 
 import { useAppContext } from './AppProvider';
+import { supabase } from '@/lib/supabase'; // 👈 Supabase 연결
 
 export default function AuthModal() {
     const { lang, isAuthModalOpen, closeAuthModal } = useAppContext();
 
-    // 팝업이 닫혀있으면 아무것도 보여주지 않음
     if (!isAuthModalOpen) return null;
 
-    // 번역 딕셔너리
+    // 🌟 구글 로그인 버튼을 눌렀을 때 실행되는 마법의 함수!
+    const handleGoogleLogin = async () => {
+        const { error } = await supabase.auth.signInWithOAuth({
+            provider: 'google',
+            options: {
+                redirectTo: window.location.origin, // 로그인 끝나면 원래 보던 홈으로 돌아오기
+            },
+        });
+
+        if (error) {
+            console.error('구글 로그인 에러:', error.message);
+            alert(lang === 'KR' ? '로그인 중 오류가 발생했습니다.' : 'Error during login.');
+        }
+    };
+
     const t = {
         title: lang === 'KR' ? '로그인이 필요합니다' : 'Login Required',
         desc: lang === 'KR' ? 'Camera Hub의 프리미엄 기능을 사용하시려면 3초 만에 로그인해 주세요.' : 'Please log in to use Camera Hub premium features.',
@@ -17,32 +31,26 @@ export default function AuthModal() {
         emailPlaceholder: lang === 'KR' ? '이메일 주소' : 'Email address',
         passwordPlaceholder: lang === 'KR' ? '비밀번호' : 'Password',
         loginBtn: lang === 'KR' ? '이메일로 시작하기' : 'Continue with Email',
-        close: lang === 'KR' ? '닫기' : 'Close'
     };
 
     return (
-        // 배경을 어둡게 덮는 레이어 (backdrop-blur로 뒤쪽을 흐리게 만듭니다)
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm animate-fade-in">
-
-            {/* 팝업 컨테이너 */}
             <div className="relative w-full max-w-md bg-white dark:bg-[#1c1c1c] p-8 md:p-10 rounded-3xl shadow-2xl mx-4 transform transition-all border border-gray-200 dark:border-gray-800">
 
-                {/* 우측 상단 X(닫기) 버튼 */}
-                <button
-                    onClick={closeAuthModal}
-                    className="absolute top-5 right-5 text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
-                >
+                <button onClick={closeAuthModal} className="absolute top-5 right-5 text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors">
                     <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                 </button>
 
-                {/* 텍스트 영역 */}
                 <div className="text-center mb-8">
                     <h2 className="text-2xl font-extrabold text-gray-900 dark:text-white tracking-tight mb-2">{t.title}</h2>
                     <p className="text-sm text-gray-500 dark:text-gray-400">{t.desc}</p>
                 </div>
 
-                {/* 구글 소셜 로그인 버튼 (가장 강조) */}
-                <button className="w-full flex items-center justify-center gap-3 bg-white dark:bg-[#2a2a2a] text-gray-900 dark:text-white border border-gray-300 dark:border-gray-700 py-3.5 rounded-xl font-bold hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors mb-6 shadow-sm">
+                {/* 👇 여기에 onClick 이벤트를 연결했습니다! */}
+                <button
+                    onClick={handleGoogleLogin}
+                    className="w-full flex items-center justify-center gap-3 bg-white dark:bg-[#2a2a2a] text-gray-900 dark:text-white border border-gray-300 dark:border-gray-700 py-3.5 rounded-xl font-bold hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors mb-6 shadow-sm"
+                >
                     <svg className="w-5 h-5" viewBox="0 0 24 24">
                         <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
                         <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
@@ -52,25 +60,15 @@ export default function AuthModal() {
                     {t.googleBtn}
                 </button>
 
-                {/* 구분선 */}
                 <div className="flex items-center my-6">
                     <div className="flex-grow border-t border-gray-200 dark:border-gray-700"></div>
                     <span className="mx-4 text-xs font-medium text-gray-400">{t.or}</span>
                     <div className="flex-grow border-t border-gray-200 dark:border-gray-700"></div>
                 </div>
 
-                {/* 이메일 입력 폼 */}
                 <div className="space-y-4">
-                    <input
-                        type="email"
-                        placeholder={t.emailPlaceholder}
-                        className="w-full bg-gray-50 dark:bg-[#121212] border border-gray-300 dark:border-gray-800 text-gray-900 dark:text-white rounded-xl px-4 py-3.5 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors"
-                    />
-                    <input
-                        type="password"
-                        placeholder={t.passwordPlaceholder}
-                        className="w-full bg-gray-50 dark:bg-[#121212] border border-gray-300 dark:border-gray-800 text-gray-900 dark:text-white rounded-xl px-4 py-3.5 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors"
-                    />
+                    <input type="email" placeholder={t.emailPlaceholder} className="w-full bg-gray-50 dark:bg-[#121212] border border-gray-300 dark:border-gray-800 text-gray-900 dark:text-white rounded-xl px-4 py-3.5 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors" />
+                    <input type="password" placeholder={t.passwordPlaceholder} className="w-full bg-gray-50 dark:bg-[#121212] border border-gray-300 dark:border-gray-800 text-gray-900 dark:text-white rounded-xl px-4 py-3.5 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors" />
                     <button className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3.5 rounded-xl transition-colors shadow-md mt-2">
                         {t.loginBtn}
                     </button>
