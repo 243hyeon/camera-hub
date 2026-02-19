@@ -6,6 +6,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import ComparisonBar from "@/components/ComparisonBar";
 import { AppProvider } from "@/components/AppProvider";
+import AuthModal from "@/components/AuthModal"; // 👈 1. 팝업 컴포넌트 불러오기!
 
 const inter = Inter({
   variable: "--font-inter",
@@ -35,6 +36,7 @@ export default function RootLayout({
           </div>
           <ComparisonBar />
           <Footer />
+          <AuthModal /> {/* 👈 2. Footer 바로 아래에 팝업을 장착! (평소엔 숨어있습니다) */}
         </AppProvider>
       </body>
     </html>

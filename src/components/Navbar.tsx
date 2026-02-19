@@ -6,7 +6,7 @@ import { useSearchParams } from 'next/navigation';
 import { useAppContext } from './AppProvider';
 
 export default function Navbar() {
-    const { lang, toggleLang, theme, toggleTheme } = useAppContext();
+    const { lang, toggleLang, theme, toggleTheme, openAuthModal } = useAppContext();
     const searchParams = useSearchParams();
     const [isAdminVisible, setIsAdminVisible] = useState(false);
 
@@ -45,6 +45,14 @@ export default function Navbar() {
                             ADMIN
                         </Link>
                     )}
+
+                    {/* 로그인 버튼 추가! */}
+                    <button
+                        onClick={openAuthModal}
+                        className="px-3 py-1.5 text-xs font-extrabold rounded-full bg-blue-600 hover:bg-blue-700 text-white transition-colors shadow-sm"
+                    >
+                        {lang === 'KR' ? '로그인' : 'Login'}
+                    </button>
 
                     {/* 테마 변경 버튼 (해/달) */}
                     <button onClick={toggleTheme} className="w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors text-gray-600 dark:text-gray-400 text-sm">
