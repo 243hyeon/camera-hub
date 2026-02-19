@@ -5,7 +5,7 @@ import { useEffect, useState } from 'react';
 import { useAppContext } from '@/components/AppProvider';
 
 export default function HomePage() {
-  const { lang } = useAppContext(); // 중앙 통제실에서 언어 가져오기
+  const { lang, openAuthModal } = useAppContext(); // 👈 openAuthModal 추가!
   const [newsItems, setNewsItems] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -101,6 +101,20 @@ export default function HomePage() {
                 <a key={index} href={news.link} target="_blank" rel="noreferrer" className="bg-white dark:bg-[#1c1c1c] border border-gray-200 dark:border-gray-800 rounded-3xl overflow-hidden hover:border-blue-500/50 transition-all duration-300 group flex flex-col h-full hover:-translate-y-1 shadow-md hover:shadow-xl dark:shadow-none">
                   <div className="h-48 overflow-hidden relative bg-gray-100 dark:bg-gray-900">
                     <span className="absolute top-3 left-3 bg-black/60 backdrop-blur-md text-white text-xs font-bold px-2 py-1 rounded z-10">PetaPixel</span>
+
+                    {/* 👇 추가된 스크랩 버튼! (absolute로 우측 상단에 띄웁니다) */}
+                    <button
+                      onClick={(e) => {
+                        e.preventDefault(); // 링크 이동 막기
+                        e.stopPropagation(); // 부모 클릭 방지
+                        openAuthModal(); // 로그인 팝업 띄우기!
+                      }}
+                      className="absolute top-3 right-3 bg-white/80 dark:bg-black/60 backdrop-blur-md p-2 rounded-full hover:bg-blue-50 hover:text-blue-600 dark:hover:bg-gray-800 transition-colors z-20 shadow-sm"
+                      title={lang === 'KR' ? '뉴스 스크랩하기' : 'Save News'}
+                    >
+                      <svg className="w-5 h-5 text-gray-700 dark:text-gray-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"></path></svg>
+                    </button>
+
                     <img
                       src={news.thumbnail || 'https://placehold.co/600x400/1f2937/ffffff.png?text=Camera+News'}
                       alt="News"
