@@ -47,10 +47,10 @@ export default function HomePage() {
     <div className="flex flex-col items-center relative overflow-hidden pb-32 transition-colors duration-300">
 
       {/* 🌟 상단: 히어로(메인 대문) 영역 */}
-      <div className="min-h-[80vh] flex flex-col items-center justify-center relative w-full pt-10">
+      <div className="min-h-[50vh] mt-10 flex flex-col items-center justify-center relative w-full pt-10">
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-blue-500/10 dark:bg-blue-900/20 rounded-full blur-[120px] -z-10 pointer-events-none"></div>
 
-        <div className="text-center z-10 px-4 mb-16 animate-fade-in-up">
+        <div className="text-center z-10 px-4 mb-10 animate-fade-in-up">
           <h2 className="text-gray-500 dark:text-gray-400 font-bold tracking-[0.2em] text-xs md:text-sm mb-6 uppercase border border-gray-300 dark:border-gray-800 rounded-full px-4 py-1.5 inline-block bg-white dark:bg-[#1c1c1c] shadow-sm">
             {t.heroTag}
           </h2>
