@@ -7,20 +7,25 @@ import { useAppContext } from '@/components/AppProvider';
 export default function HomePage() {
   const { lang } = useAppContext(); // 중앙 통제실에서 언어 가져오기
   const [newsItems, setNewsItems] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-  // PetaPixel 뉴스를 클라이언트에서 불러오기
+  // 🎯 메인 화면도 '번역 API 통제소'를 이용하도록 수정!
   useEffect(() => {
     const fetchNews = async () => {
+      setIsLoading(true);
       try {
-        const res = await fetch('https://api.rss2json.com/v1/api.json?rss_url=https://petapixel.com/feed/');
+        // PetaPixel 원본 대신 우리가 만든 번역 API로 3개만 요청!
+        const res = await fetch(`/api/news?limit=3&lang=${lang}`);
         const data = await res.json();
-        setNewsItems(data.items.slice(0, 3));
+        setNewsItems(data.items);
       } catch (error) {
         console.error('뉴스 연동 실패:', error);
+      } finally {
+        setIsLoading(false);
       }
     };
     fetchNews();
-  }, []);
+  }, [lang]); // KR/EN 언어 토글이 바뀔 때마다 다시 번역해 옵니다.
 
   // 🎯 다국어 번역 딕셔너리
   const t = {
@@ -35,7 +40,7 @@ export default function HomePage() {
     newsBadge: 'Latest Updates',
     newsTitle: lang === 'KR' ? '글로벌 최신 뉴스' : 'Global Camera News',
     newsAll: lang === 'KR' ? 'PetaPixel 전체보기' : 'View All PetaPixel',
-    newsLoading: lang === 'KR' ? '현재 뉴스를 불러오고 있습니다... 📡' : 'Fetching latest news... 📡'
+    newsLoading: lang === 'KR' ? '최신 뉴스를 번역 중입니다... 📡' : 'Fetching latest news... 📡'
   };
 
   return (
@@ -78,15 +83,18 @@ export default function HomePage() {
             </span>
             <h2 className="text-3xl font-extrabold text-gray-900 dark:text-white">{t.newsTitle}</h2>
           </div>
-          <a href="https://petapixel.com" target="_blank" rel="noreferrer" className="text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors flex items-center gap-1 font-medium">
+          <Link href="/news" className="text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors flex items-center gap-1 font-medium">
             {t.newsAll} <span className="text-lg">→</span>
-          </a>
+          </Link>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {newsItems.length > 0 ? (
+          {isLoading || newsItems.length === 0 ? (
+            <div className="col-span-3 text-center py-20 text-gray-500 bg-gray-50 dark:bg-[#1c1c1c] rounded-3xl border border-gray-200 dark:border-gray-800 font-medium animate-pulse">
+              {t.newsLoading}
+            </div>
+          ) : (
             newsItems.map((news: any, index: number) => {
-              const cleanDescription = news.description.replace(/<[^>]+>/g, '').slice(0, 100) + '...';
               const pubDate = new Date(news.pubDate).toLocaleDateString(lang === 'KR' ? 'ko-KR' : 'en-US');
 
               return (
@@ -104,7 +112,7 @@ export default function HomePage() {
                       {news.title}
                     </h3>
                     <p className="text-sm text-gray-600 dark:text-gray-400 mb-6 line-clamp-3 leading-relaxed flex-grow">
-                      {cleanDescription}
+                      {news.description}
                     </p>
                     <div className="text-xs text-gray-400 dark:text-gray-500 font-medium">
                       {pubDate}
@@ -113,10 +121,6 @@ export default function HomePage() {
                 </a>
               );
             })
-          ) : (
-            <div className="col-span-3 text-center py-20 text-gray-500 bg-gray-50 dark:bg-[#1c1c1c] rounded-3xl border border-gray-200 dark:border-gray-800 font-medium">
-              {t.newsLoading}
-            </div>
           )}
         </div>
       </div>
