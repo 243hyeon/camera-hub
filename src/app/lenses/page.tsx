@@ -2,11 +2,12 @@
 
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
-import Link from 'next/link';
-import { useAppContext } from '@/components/AppProvider'; // 👈 중앙 통제실 연결!
+import { useRouter } from 'next/navigation'; // 👈 라우터 기능 추가!
+import { useAppContext } from '@/components/AppProvider';
 
 export default function LensesPage() {
-    const { lang } = useAppContext(); // 현재 언어 상태 가져오기
+    const { lang } = useAppContext();
+    const router = useRouter(); // 👈 카드 클릭 시 이동을 위한 라우터 선언
     const [lenses, setLenses] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
 
@@ -35,7 +36,6 @@ export default function LensesPage() {
         return matchBrand && matchAngle && matchType && matchLevel;
     });
 
-    // 🎯 다국어 번역 딕셔너리
     const t = {
         title: lang === 'KR' ? '렌즈 대백과' : 'Lens Encyclopedia',
         desc: lang === 'KR' ? '당신의 시선을 완성할 70여 종의 완벽한 렌즈 라인업' : 'A complete lineup of over 70 lenses to perfect your vision',
@@ -45,15 +45,13 @@ export default function LensesPage() {
         filterLevel: lang === 'KR' ? '등급' : 'Level',
         noResult: lang === 'KR' ? '조건에 맞는 렌즈가 없습니다. 😅' : 'No lenses match your criteria. 😅',
         currency: lang === 'KR' ? '원' : 'KRW',
-        detailBtn: lang === 'KR' ? '자세히 보기' : 'Details',
-        compareBtn: lang === 'KR' ? '비교' : 'Compare',
+        compareBtn: lang === 'KR' ? '비교하기' : 'Compare',
         cancelBtn: lang === 'KR' ? '비교 취소' : 'Cancel',
         clearAll: lang === 'KR' ? '전체 삭제' : 'Clear All',
         doCompare: lang === 'KR' ? '스펙 비교하기' : 'Compare Specs',
         selected: lang === 'KR' ? '개 선택됨' : 'selected',
     };
 
-    // 🎯 필터 및 태그 번역 매핑
     const brandOptions = [
         { value: 'All', label: lang === 'KR' ? '전체 보기' : 'All Brands' },
         { value: 'Sony', label: 'Sony' }, { value: 'Canon', label: 'Canon' }, { value: 'Nikon', label: 'Nikon' }
@@ -101,7 +99,6 @@ export default function LensesPage() {
                 <p className="text-gray-600 dark:text-gray-400">{t.desc}</p>
             </div>
 
-            {/* 필터 영역 */}
             <div className="mb-8 space-y-4 bg-white dark:bg-[#1c1c1c] p-6 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm dark:shadow-none transition-colors duration-300">
                 {[
                     { label: t.filterBrand, options: brandOptions, state: selectedBrand, set: setSelectedBrand, activeColor: 'bg-gray-900 text-white dark:bg-white dark:text-black' },
@@ -120,7 +117,6 @@ export default function LensesPage() {
                 ))}
             </div>
 
-            {/* 리스트 영역 */}
             {filteredLenses.length === 0 ? (
                 <div className="text-center py-32 text-gray-500 text-lg">{t.noResult}</div>
             ) : (
@@ -128,7 +124,12 @@ export default function LensesPage() {
                     {filteredLenses.map((lens) => {
                         const isComparing = compareList.find((c) => c.id === lens.id);
                         return (
-                            <div key={lens.id} className={`bg-white dark:bg-[#1c1c1c] border rounded-2xl overflow-hidden hover:border-gray-400 dark:hover:border-gray-500 transition-all duration-300 group flex flex-col h-full shadow-sm hover:shadow-xl dark:shadow-none ${isComparing ? 'border-blue-500 dark:border-blue-500 shadow-[0_0_15px_rgba(59,130,246,0.3)]' : 'border-gray-200 dark:border-gray-800'}`}>
+                            // 🎯 1. 카드 전체에 onClick과 cursor-pointer를 줍니다!
+                            <div
+                                key={lens.id}
+                                onClick={() => router.push(`/lenses/${lens.id}`)}
+                                className={`cursor-pointer bg-white dark:bg-[#1c1c1c] border rounded-2xl overflow-hidden hover:border-gray-400 dark:hover:border-gray-500 transition-all duration-300 group flex flex-col h-full shadow-sm hover:shadow-xl dark:shadow-none ${isComparing ? 'border-blue-500 dark:border-blue-500 shadow-[0_0_15px_rgba(59,130,246,0.3)]' : 'border-gray-200 dark:border-gray-800'}`}
+                            >
 
                                 <div className="relative h-56 bg-gray-50 dark:bg-white p-6 flex items-center justify-center overflow-hidden">
                                     <span className={`absolute top-3 left-3 px-3 py-1 text-xs font-extrabold rounded-full bg-gray-800 text-white z-10`}>
@@ -154,11 +155,15 @@ export default function LensesPage() {
                                         </p>
                                     </div>
 
-                                    <div className="mt-4 flex gap-2">
-                                        <Link href={`/lenses/${lens.id}`} className="flex-1 flex items-center justify-center text-center bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white py-2 rounded-lg text-sm font-bold hover:bg-gray-200 dark:hover:bg-gray-700 transition">
-                                            {t.detailBtn}
-                                        </Link>
-                                        <button onClick={() => toggleCompare(lens)} className={`px-4 py-2 rounded-lg text-sm font-bold transition border ${isComparing ? 'bg-blue-600 text-white border-blue-600 hover:bg-blue-700' : 'bg-white dark:bg-[#1c1c1c] text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800'}`}>
+                                    {/* 🎯 2. 자세히 보기 버튼은 삭제하고, 비교하기 버튼만 남겨 꽉 채웁니다. */}
+                                    <div className="mt-4 pt-4 border-t border-gray-100 dark:border-gray-800">
+                                        <button
+                                            onClick={(e) => {
+                                                e.stopPropagation(); // 👈 부모 카드의 클릭 이벤트(페이지 이동)를 막아주는 마법의 방패!
+                                                toggleCompare(lens);
+                                            }}
+                                            className={`w-full text-center py-2.5 rounded-lg text-sm font-bold transition border ${isComparing ? 'bg-blue-600 text-white border-blue-600 hover:bg-blue-700 shadow-md' : 'bg-gray-50 dark:bg-[#1c1c1c] text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800'}`}
+                                        >
                                             {isComparing ? t.cancelBtn : t.compareBtn}
                                         </button>
                                     </div>
@@ -169,7 +174,6 @@ export default function LensesPage() {
                 </div>
             )}
 
-            {/* 비교 플로팅 바 & 모달 (다크모드 지원) */}
             {compareList.length > 0 && (
                 <div className="fixed bottom-0 left-0 right-0 bg-white dark:bg-[#121212] border-t border-gray-200 dark:border-gray-800 p-4 z-40 shadow-[0_-10px_30px_rgba(0,0,0,0.1)] dark:shadow-[0_-10px_30px_rgba(0,0,0,0.5)] flex flex-col md:flex-row justify-between items-center gap-4 animate-fade-in-up transition-colors duration-300">
                     <div className="flex items-center gap-4">
