@@ -2,13 +2,21 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { useSearchParams } from 'next/navigation';
+import { usePathname, useSearchParams } from 'next/navigation';
 import { useAppContext } from './AppProvider';
+import { supabase } from '@/lib/supabase'; // 👈 Supabase 불러오기 추가!
 
 export default function Navbar() {
-    const { lang, toggleLang, theme, toggleTheme, openAuthModal } = useAppContext();
+    const pathname = usePathname();
+    const { lang, toggleLang, theme, toggleTheme, openAuthModal, user } = useAppContext();
     const searchParams = useSearchParams();
     const [isAdminVisible, setIsAdminVisible] = useState(false);
+
+    // 👇 로그아웃 함수 추가!
+    const handleLogout = async () => {
+        await supabase.auth.signOut();
+        window.location.reload(); // 깔끔하게 새로고침
+    };
 
     useEffect(() => {
         const isLocal = window.location.hostname === 'localhost';
@@ -46,13 +54,30 @@ export default function Navbar() {
                         </Link>
                     )}
 
-                    {/* 로그인 버튼 추가! */}
-                    <button
-                        onClick={openAuthModal}
-                        className="px-3 py-1.5 text-xs font-extrabold rounded-full bg-blue-600 hover:bg-blue-700 text-white transition-colors shadow-sm"
-                    >
-                        {lang === 'KR' ? '로그인' : 'Login'}
-                    </button>
+                    {/* 👇 유저가 있으면 프로필을, 없으면 로그인 버튼을 보여줍니다! */}
+                    {user ? (
+                        <div className="flex items-center gap-3">
+                            {/* 구글 프로필 이미지 띄우기 */}
+                            <img
+                                src={user.user_metadata?.avatar_url || 'https://placehold.co/100x100?text=U'}
+                                alt="profile"
+                                className="w-7 h-7 rounded-full border border-gray-200 dark:border-gray-700 shadow-sm"
+                            />
+                            <button
+                                onClick={handleLogout}
+                                className="text-xs font-bold text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
+                            >
+                                {lang === 'KR' ? '로그아웃' : 'Logout'}
+                            </button>
+                        </div>
+                    ) : (
+                        <button
+                            onClick={openAuthModal}
+                            className="px-3 py-1.5 text-xs font-extrabold rounded-full bg-blue-600 hover:bg-blue-700 text-white transition-colors shadow-sm"
+                        >
+                            {lang === 'KR' ? '로그인' : 'Login'}
+                        </button>
+                    )}
 
                     {/* 테마 변경 버튼 (해/달) */}
                     <button onClick={toggleTheme} className="w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors text-gray-600 dark:text-gray-400 text-sm">
