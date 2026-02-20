@@ -5,7 +5,7 @@ import { useEffect, useState } from 'react';
 import { useAppContext } from '@/components/AppProvider';
 
 export default function HomePage() {
-  const { lang, openAuthModal } = useAppContext(); // 👈 openAuthModal 추가!
+  const { lang, openAuthModal, user } = useAppContext(); // 👈 openAuthModal 추가!
   const [newsItems, setNewsItems] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -107,7 +107,12 @@ export default function HomePage() {
                       onClick={(e) => {
                         e.preventDefault(); // 링크 이동 막기
                         e.stopPropagation(); // 부모 클릭 방지
-                        openAuthModal(); // 로그인 팝업 띄우기!
+                        if (!user) {
+                          openAuthModal(); // 👈 로그인 안 했으면 팝업!
+                        } else {
+                          // 👈 로그인 했으면 실제 기능 실행! (다음 단계에서 DB 연동 예정)
+                          alert(lang === 'KR' ? '기사가 스크랩되었습니다! 🔖' : 'News saved! 🔖');
+                        }
                       }}
                       className="absolute top-3 right-3 bg-white/80 dark:bg-black/60 backdrop-blur-md p-2 rounded-full hover:bg-blue-50 hover:text-blue-600 dark:hover:bg-gray-800 transition-colors z-20 shadow-sm"
                       title={lang === 'KR' ? '뉴스 스크랩하기' : 'Save News'}

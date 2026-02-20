@@ -12,7 +12,7 @@ type Message = {
 };
 
 export default function AIGuidePage() {
-    const { lang, openAuthModal } = useAppContext();
+    const { lang, openAuthModal, user } = useAppContext();
     const [input, setInput] = useState('');
     const [messages, setMessages] = useState<Message[]>([]);
     const [isLoading, setIsLoading] = useState(false);
@@ -168,7 +168,13 @@ export default function AIGuidePage() {
                                 {msg.role === 'ai' && msg.id !== 1 && ( // (id가 1인 첫 인사말에는 저장 버튼을 띄우지 않습니다)
                                     <div className="absolute -bottom-4 right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                                         <button
-                                            onClick={openAuthModal}
+                                            onClick={() => {
+                                                if (!user) {
+                                                    openAuthModal();
+                                                } else {
+                                                    alert(lang === 'KR' ? '답변이 내 서재에 저장되었습니다! 🤖' : 'Response saved! 🤖');
+                                                }
+                                            }}
                                             className="flex items-center gap-1.5 bg-white dark:bg-[#2a2a2a] text-xs font-bold text-gray-600 dark:text-gray-300 px-3 py-1.5 rounded-full shadow-md border border-gray-200 dark:border-gray-700 hover:text-blue-600 dark:hover:text-blue-400 hover:border-blue-500 transition-colors"
                                         >
                                             <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"></path></svg>

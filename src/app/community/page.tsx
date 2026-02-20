@@ -3,7 +3,7 @@
 import { useAppContext } from '@/components/AppProvider';
 
 export default function CommunityPage() {
-    const { lang, openAuthModal } = useAppContext();
+    const { lang, openAuthModal, user } = useAppContext();
 
     const t = {
         title: lang === 'KR' ? '커뮤니티' : 'Community',
@@ -34,7 +34,13 @@ export default function CommunityPage() {
 
                 {/* 👇 핵심! 글쓰기를 누르면 로그인 팝업이 뜹니다 👇 */}
                 <button
-                    onClick={openAuthModal}
+                    onClick={() => {
+                        if (!user) {
+                            openAuthModal();
+                        } else {
+                            alert(lang === 'KR' ? '글쓰기 에디터가 열립니다! ✏️' : 'Opening editor! ✏️');
+                        }
+                    }}
                     className="px-6 py-3.5 bg-gray-900 text-white dark:bg-white dark:text-black rounded-full font-bold shadow-lg hover:scale-105 transition-transform whitespace-nowrap"
                 >
                     {t.writeBtn}

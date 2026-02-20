@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { useAppContext } from '@/components/AppProvider'; // 👈 중앙 통제실에서 언어 정보 가져오기
 
 export default function NewsPage() {
-    const { lang, openAuthModal } = useAppContext();
+    const { lang, openAuthModal, user } = useAppContext();
     const [newsItems, setNewsItems] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
 
@@ -72,7 +72,11 @@ export default function NewsPage() {
                                         onClick={(e) => {
                                             e.preventDefault();
                                             e.stopPropagation();
-                                            openAuthModal();
+                                            if (!user) {
+                                                openAuthModal();
+                                            } else {
+                                                alert(lang === 'KR' ? '기사가 스크랩되었습니다! 🔖' : 'News saved! 🔖');
+                                            }
                                         }}
                                         className="absolute top-3 right-3 bg-white/80 dark:bg-black/60 backdrop-blur-md p-2 rounded-full hover:bg-blue-50 hover:text-blue-600 dark:hover:bg-gray-800 transition-colors z-20 shadow-sm"
                                         title={lang === 'KR' ? '뉴스 스크랩하기' : 'Save News'}
