@@ -15,6 +15,9 @@ type AppContextType = {
     // 👇 스크랩 기능을 전역으로 추가!
     savedNewsLinks: string[];
     toggleScrap: (news: any, e: React.MouseEvent) => void;
+    // 👇 AI 답변 스크랩 기능 추가!
+    savedAiChats: string[];
+    toggleAiScrap: (content: string, e: React.MouseEvent) => void;
 };
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -27,6 +30,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
     // 👇 스크랩 목록을 중앙에서 관리합니다.
     const [savedNewsLinks, setSavedNewsLinks] = useState<string[]>([]);
+    const [savedAiChats, setSavedAiChats] = useState<string[]>([]); // AI 답변 스크랩 목록
 
     useEffect(() => {
         const root = window.document.documentElement;
@@ -50,17 +54,25 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
     // 🌟 유저가 바뀌면 창고에서 스크랩 목록을 '중앙'으로 가져옵니다!
     useEffect(() => {
-        const fetchSavedNews = async () => {
+        const fetchSavedData = async () => {
             if (!user) {
                 setSavedNewsLinks([]);
+                setSavedAiChats([]);
                 return;
             }
-            const { data } = await supabase.from('saved_news').select('link').eq('user_id', user.id);
-            if (data) {
-                setSavedNewsLinks(data.map((item) => item.link));
+            // 뉴스 스크랩 가져오기
+            const { data: newsData } = await supabase.from('saved_news').select('link').eq('user_id', user.id);
+            if (newsData) {
+                setSavedNewsLinks(newsData.map((item) => item.link));
+            }
+
+            // AI 답변 스크랩 가져오기
+            const { data: aiData } = await supabase.from('saved_ai_chats').select('content').eq('user_id', user.id);
+            if (aiData) {
+                setSavedAiChats(aiData.map((item) => item.content));
             }
         };
-        fetchSavedNews();
+        fetchSavedData();
     }, [user]);
 
     // 🌟 스크랩 함수도 중앙 통제실에서 쏴줍니다!
@@ -90,6 +102,30 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         }
     };
 
+    // 🌟 AI 답변 스크랩 함수
+    const toggleAiScrap = async (content: string, e: React.MouseEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
+
+        if (!user) {
+            setIsAuthModalOpen(true);
+            return;
+        }
+
+        const isSaved = savedAiChats.includes(content);
+
+        if (isSaved) {
+            const { error } = await supabase.from('saved_ai_chats').delete().eq('user_id', user.id).eq('content', content);
+            if (!error) setSavedAiChats((prev) => prev.filter((c) => c !== content));
+        } else {
+            const { error } = await supabase.from('saved_ai_chats').insert({
+                user_id: user.id,
+                content: content
+            });
+            if (!error) setSavedAiChats((prev) => [...prev, content]);
+        }
+    };
+
     const toggleLang = () => setLang((prev) => (prev === 'KR' ? 'EN' : 'KR'));
     const toggleTheme = () => setTheme((prev) => (prev === 'dark' ? 'light' : 'dark'));
     const openAuthModal = () => setIsAuthModalOpen(true);
@@ -97,7 +133,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
     return (
         // 하위 컴포넌트들이 savedNewsLinks와 toggleScrap을 쓸 수 있게 내려줍니다!
-        <AppContext.Provider value={{ lang, toggleLang, theme, toggleTheme, isAuthModalOpen, openAuthModal, closeAuthModal, user, savedNewsLinks, toggleScrap }}>
+        <AppContext.Provider value={{ lang, toggleLang, theme, toggleTheme, isAuthModalOpen, openAuthModal, closeAuthModal, user, savedNewsLinks, toggleScrap, savedAiChats, toggleAiScrap }}>
             {children}
         </AppContext.Provider>
     );

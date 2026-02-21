@@ -60,19 +60,26 @@ export default function Navbar() {
                     {!isMounted ? (
                         <div className="w-[60px] h-[28px] rounded-full bg-gray-200 dark:bg-gray-800 animate-pulse"></div>
                     ) : user ? (
-                        <div className="flex items-center gap-3">
-                            {/* 구글 프로필 이미지 띄우기 */}
-                            <img
-                                src={user.user_metadata?.avatar_url || 'https://placehold.co/100x100?text=U'}
-                                alt="profile"
-                                className="w-7 h-7 rounded-full border border-gray-200 dark:border-gray-700 shadow-sm"
-                            />
-                            <button
-                                onClick={handleLogout}
-                                className="text-xs font-bold text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
-                            >
-                                {lang === 'KR' ? '로그아웃' : 'Logout'}
-                            </button>
+                        <div className="flex items-center gap-4">
+                            <Link href="/library" className="text-xs font-bold text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors flex items-center gap-1">
+                                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"></path></svg>
+                                {lang === 'KR' ? '내 서재' : 'Library'}
+                            </Link>
+                            <div className="h-4 w-px bg-gray-300 dark:bg-gray-700"></div>
+                            <div className="flex items-center gap-2">
+                                {/* 구글 프로필 이미지 띄우기 */}
+                                <img
+                                    src={user.user_metadata?.avatar_url || 'https://placehold.co/100x100?text=U'}
+                                    alt="profile"
+                                    className="w-7 h-7 rounded-full border border-gray-200 dark:border-gray-700 shadow-sm"
+                                />
+                                <button
+                                    onClick={handleLogout}
+                                    className="text-xs font-bold text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
+                                >
+                                    {lang === 'KR' ? '로그아웃' : 'Logout'}
+                                </button>
+                            </div>
                         </div>
                     ) : (
                         <button

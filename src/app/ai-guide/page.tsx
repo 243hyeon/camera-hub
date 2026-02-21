@@ -12,7 +12,7 @@ type Message = {
 };
 
 export default function AIGuidePage() {
-    const { lang, openAuthModal, user } = useAppContext();
+    const { lang, openAuthModal, user, savedAiChats, toggleAiScrap } = useAppContext();
     const [input, setInput] = useState('');
     const [messages, setMessages] = useState<Message[]>([]);
     const [isLoading, setIsLoading] = useState(false);
@@ -166,21 +166,25 @@ export default function AIGuidePage() {
 
                                 {/* 👇 여기에 AI 답변일 때만 나오는 [저장] 버튼을 추가합니다! 👇 */}
                                 {msg.role === 'ai' && msg.id !== 1 && ( // (id가 1인 첫 인사말에는 저장 버튼을 띄우지 않습니다)
-                                    <div className="absolute -bottom-4 right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                                        <button
-                                            onClick={() => {
-                                                if (!user) {
-                                                    openAuthModal();
-                                                } else {
-                                                    alert(lang === 'KR' ? '답변이 내 서재에 저장되었습니다! 🤖' : 'Response saved! 🤖');
-                                                }
-                                            }}
-                                            className="flex items-center gap-1.5 bg-white dark:bg-[#2a2a2a] text-xs font-bold text-gray-600 dark:text-gray-300 px-3 py-1.5 rounded-full shadow-md border border-gray-200 dark:border-gray-700 hover:text-blue-600 dark:hover:text-blue-400 hover:border-blue-500 transition-colors"
-                                        >
-                                            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"></path></svg>
-                                            답변 저장
-                                        </button>
-                                    </div>
+                                    (() => {
+                                        const isSaved = savedAiChats.includes(msg.content);
+                                        return (
+                                            <div className="absolute -bottom-4 right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                                                <button
+                                                    onClick={(e) => toggleAiScrap(msg.content, e)}
+                                                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full shadow-md border transition-colors text-xs font-bold
+                                                        ${isSaved
+                                                            ? 'bg-yellow-400 text-white border-yellow-500 hover:bg-yellow-500' // 저장됨
+                                                            : 'bg-white dark:bg-[#2a2a2a] text-gray-600 dark:text-gray-300 border-gray-200 dark:border-gray-700 hover:text-blue-600 dark:hover:text-blue-400 hover:border-blue-500' // 저장 안됨
+                                                        }
+                                                    `}
+                                                >
+                                                    <svg className="w-3.5 h-3.5" fill={isSaved ? "currentColor" : "none"} stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"></path></svg>
+                                                    {isSaved ? (lang === 'KR' ? '저장됨' : 'Saved') : (lang === 'KR' ? '답변 저장' : 'Save')}
+                                                </button>
+                                            </div>
+                                        );
+                                    })()
                                 )}
                                 {/* 👆 추가 끝 👆 */}
 
