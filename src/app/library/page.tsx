@@ -246,12 +246,15 @@ export default function LibraryPage() {
                                                     p: ({ node, ...props }) => <p className="m-0 mb-4" {...props} />,
                                                     // <a> 태그(링크)를 가로채서 우리가 원하는 버튼으로 커스텀합니다!
                                                     a: ({ node, href, children }) => {
-                                                        // 우리가 만든 특수 링크(action:)인지 확인
-                                                        if (href?.startsWith('action:')) {
-                                                            const productName = decodeURIComponent(href.replace('action:', ''));
+                                                        // 우리가 만든 특수 링크(#compare:)인지 확인
+                                                        if (href?.startsWith('#compare:')) {
+                                                            const productName = decodeURIComponent(href.replace('#compare:', ''));
                                                             return (
                                                                 <button
-                                                                    onClick={() => handleProductClick(productName)}
+                                                                    onClick={(e) => {
+                                                                        e.preventDefault();
+                                                                        handleProductClick(productName);
+                                                                    }}
                                                                     className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 text-blue-600 dark:bg-blue-900/40 dark:text-blue-400 rounded-full text-xs font-bold hover:bg-blue-100 dark:hover:bg-blue-900/60 transition-colors border border-blue-200 dark:border-blue-800 shadow-sm mx-1 my-1"
                                                                 >
                                                                     <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
@@ -265,7 +268,7 @@ export default function LibraryPage() {
                                                 }}
                                             >
                                                 {/* 👇 정규식을 이용해 [[COMPARE:이름]] 을 특수 마크다운 링크로 변환해서 렌더링! */}
-                                                {chat.content.replace(/\[\[COMPARE:(.*?)\]\]/g, '[$1](action:$1)')}
+                                                {chat.content.replace(/\[\[COMPARE:(.*?)\]\]/g, '[$1](#compare:$1)')}
                                             </ReactMarkdown>
                                         </div>
                                     </div>
