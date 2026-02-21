@@ -11,6 +11,7 @@ export default function Navbar() {
     const { lang, toggleLang, theme, toggleTheme, openAuthModal, user } = useAppContext();
     const searchParams = useSearchParams();
     const [isAdminVisible, setIsAdminVisible] = useState(false);
+    const [isMounted, setIsMounted] = useState(false);
 
     // 👇 로그아웃 함수 추가!
     const handleLogout = async () => {
@@ -19,6 +20,7 @@ export default function Navbar() {
     };
 
     useEffect(() => {
+        setIsMounted(true);
         const isLocal = window.location.hostname === 'localhost';
         const hasAdminQuery = searchParams.get('admin') === 'true';
         setIsAdminVisible(isLocal || hasAdminQuery);
@@ -55,7 +57,9 @@ export default function Navbar() {
                     )}
 
                     {/* 👇 유저가 있으면 프로필을, 없으면 로그인 버튼을 보여줍니다! */}
-                    {user ? (
+                    {!isMounted ? (
+                        <div className="w-[60px] h-[28px] rounded-full bg-gray-200 dark:bg-gray-800 animate-pulse"></div>
+                    ) : user ? (
                         <div className="flex items-center gap-3">
                             {/* 구글 프로필 이미지 띄우기 */}
                             <img
