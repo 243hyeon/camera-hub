@@ -3,63 +3,12 @@
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { useAppContext } from '@/components/AppProvider';
-import { supabase } from '@/lib/supabase'; // 👈 이거 한 줄 추가!
 
 export default function HomePage() {
-  const { lang, openAuthModal, user } = useAppContext(); // 👈 openAuthModal 추가!
+  // 👇 중앙 통제실에서 스크랩 목록과 함수를 꺼내옵니다!
+  const { lang, user, savedNewsLinks, toggleScrap } = useAppContext();
   const [newsItems, setNewsItems] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [savedNewsLinks, setSavedNewsLinks] = useState<string[]>([]); // 👈 스크랩한 기사 링크들을 모아둘 배열
-
-  // 🌟 유저가 로그인하면, 창고(DB)에서 기존에 스크랩한 기사 목록을 싹 가져옵니다.
-  useEffect(() => {
-    const fetchSavedNews = async () => {
-      if (!user) {
-        setSavedNewsLinks([]);
-        return;
-      }
-      const { data } = await supabase.from('saved_news').select('link').eq('user_id', user.id);
-      if (data) {
-        setSavedNewsLinks(data.map((item) => item.link));
-      }
-    };
-    fetchSavedNews();
-  }, [user]);
-
-  // 🌟 스크랩 버튼을 눌렀을 때 작동할 핵심 마법! (저장 & 취소)
-  const toggleScrap = async (news: any, e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-
-    if (!user) {
-      openAuthModal();
-      return;
-    }
-
-    const isSaved = savedNewsLinks.includes(news.link);
-
-    if (isSaved) {
-      // 이미 저장된 기사라면? -> 창고에서 삭제!
-      const { error } = await supabase.from('saved_news').delete().eq('user_id', user.id).eq('link', news.link);
-      if (!error) {
-        setSavedNewsLinks((prev) => prev.filter((link) => link !== news.link));
-        // alert(lang === 'KR' ? '스크랩이 취소되었습니다.' : 'Removed from saved news.'); // 알림창은 주석 처리하거나 빼도 좋습니다!
-      }
-    } else {
-      // 저장 안 된 기사라면? -> 창고에 추가!
-      const { error } = await supabase.from('saved_news').insert({
-        user_id: user.id,
-        title: news.title,
-        link: news.link,
-        thumbnail: news.thumbnail,
-        description: news.description
-      });
-      if (!error) {
-        setSavedNewsLinks((prev) => [...prev, news.link]);
-        // alert(lang === 'KR' ? '기사가 스크랩되었습니다! 🔖' : 'News saved! 🔖');
-      }
-    }
-  };
 
   // 🎯 메인 화면도 '번역 API 통제소'를 이용하도록 수정!
   useEffect(() => {
@@ -161,8 +110,8 @@ export default function HomePage() {
                         <button
                           onClick={(e) => toggleScrap(news, e)}
                           className={`absolute top-3 right-3 p-2 rounded-full transition-all duration-300 z-20 shadow-sm backdrop-blur-md ${isSaved
-                              ? 'bg-yellow-400 text-white hover:bg-yellow-500 scale-110' // 👈 저장되었을 때: 예쁜 노란색 & 살짝 커짐!
-                              : 'bg-white/80 dark:bg-black/60 text-gray-700 dark:text-gray-200 hover:bg-blue-50 hover:text-blue-600 dark:hover:bg-gray-800' // 저장 안 되었을 때
+                            ? 'bg-yellow-400 text-white hover:bg-yellow-500 scale-110' // 👈 저장되었을 때: 예쁜 노란색 & 살짝 커짐!
+                            : 'bg-white/80 dark:bg-black/60 text-gray-700 dark:text-gray-200 hover:bg-blue-50 hover:text-blue-600 dark:hover:bg-gray-800' // 저장 안 되었을 때
                             }`}
                           title={lang === 'KR' ? '뉴스 스크랩하기' : 'Save News'}
                         >

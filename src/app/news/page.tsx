@@ -4,7 +4,8 @@ import { useEffect, useState } from 'react';
 import { useAppContext } from '@/components/AppProvider'; // 👈 중앙 통제실에서 언어 정보 가져오기
 
 export default function NewsPage() {
-    const { lang, openAuthModal, user } = useAppContext();
+    // 👇 중앙 통제실에서 스크랩 목록과 함수를 꺼내옵니다!
+    const { lang, savedNewsLinks, toggleScrap } = useAppContext();
     const [newsItems, setNewsItems] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
 
@@ -67,22 +68,23 @@ export default function NewsPage() {
                                 <div className="h-40 overflow-hidden relative bg-gray-100 dark:bg-gray-900">
                                     <span className="absolute top-3 left-3 bg-black/70 backdrop-blur-md text-white text-xs font-bold px-2.5 py-1 rounded z-10 border border-gray-700">PetaPixel</span>
 
-                                    {/* 👇 추가된 스크랩 버튼! */}
-                                    <button
-                                        onClick={(e) => {
-                                            e.preventDefault();
-                                            e.stopPropagation();
-                                            if (!user) {
-                                                openAuthModal();
-                                            } else {
-                                                alert(lang === 'KR' ? '기사가 스크랩되었습니다! 🔖' : 'News saved! 🔖');
-                                            }
-                                        }}
-                                        className="absolute top-3 right-3 bg-white/80 dark:bg-black/60 backdrop-blur-md p-2 rounded-full hover:bg-blue-50 hover:text-blue-600 dark:hover:bg-gray-800 transition-colors z-20 shadow-sm"
-                                        title={lang === 'KR' ? '뉴스 스크랩하기' : 'Save News'}
-                                    >
-                                        <svg className="w-5 h-5 text-gray-700 dark:text-gray-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"></path></svg>
-                                    </button>
+                                    {/* 👇 뉴스 카드 반복문(map) 안쪽의 스크랩 버튼을 메인 화면과 똑같이 적용합니다! */}
+                                    {(() => {
+                                        const isSaved = savedNewsLinks.includes(news.link);
+                                        return (
+                                            <button
+                                                onClick={(e) => toggleScrap(news, e)}
+                                                className={`absolute top-3 right-3 p-2 rounded-full transition-all duration-300 z-20 shadow-sm backdrop-blur-md ${isSaved
+                                                        ? 'bg-yellow-400 text-white hover:bg-yellow-500 scale-110'
+                                                        : 'bg-white/80 dark:bg-black/60 text-gray-700 dark:text-gray-200 hover:bg-blue-50 hover:text-blue-600 dark:hover:bg-gray-800'
+                                                    }`}
+                                            >
+                                                <svg className="w-5 h-5" fill={isSaved ? "currentColor" : "none"} stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"></path>
+                                                </svg>
+                                            </button>
+                                        );
+                                    })()}
 
                                     <img
                                         src={news.thumbnail || 'https://placehold.co/600x400/1f2937/ffffff.png?text=News'}

@@ -1,7 +1,7 @@
 "use client";
 
 import { createContext, useContext, useState, useEffect } from 'react';
-import { supabase } from '@/lib/supabase'; // 👈 Supabase 엔진 가져오기!
+import { supabase } from '@/lib/supabase';
 
 type AppContextType = {
     lang: string;
@@ -11,7 +11,10 @@ type AppContextType = {
     isAuthModalOpen: boolean;
     openAuthModal: () => void;
     closeAuthModal: () => void;
-    user: any; // 👈 현재 로그인한 유저 정보를 담을 공간
+    user: any;
+    // 👇 스크랩 기능을 전역으로 추가!
+    savedNewsLinks: string[];
+    toggleScrap: (news: any, e: React.MouseEvent) => void;
 };
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -20,32 +23,72 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     const [lang, setLang] = useState('KR');
     const [theme, setTheme] = useState('dark');
     const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
-    const [user, setUser] = useState<any>(null); // 👈 기본값은 '로그인 안 됨(null)'
+    const [user, setUser] = useState<any>(null);
 
-    // 1. 테마 설정
+    // 👇 스크랩 목록을 중앙에서 관리합니다.
+    const [savedNewsLinks, setSavedNewsLinks] = useState<string[]>([]);
+
     useEffect(() => {
         const root = window.document.documentElement;
         if (theme === 'dark') root.classList.add('dark');
         else root.classList.remove('dark');
     }, [theme]);
 
-    // 2. 🌟 Supabase 엔진에 접속해서 유저 상태 확인하기!
+    // 유저 로그인 상태 추적
     useEffect(() => {
-        // 처음에 접속했을 때 로그인 상태 확인
         supabase.auth.getSession().then(({ data: { session } }) => {
             setUser(session?.user ?? null);
         });
 
-        // 로그인/로그아웃 상태가 변할 때마다 실시간으로 업데이트
         const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
             setUser(session?.user ?? null);
-            if (session?.user) {
-                setIsAuthModalOpen(false); // 로그인 성공하면 팝업창 자동으로 닫기!
-            }
+            if (session?.user) setIsAuthModalOpen(false);
         });
 
         return () => subscription.unsubscribe();
     }, []);
+
+    // 🌟 유저가 바뀌면 창고에서 스크랩 목록을 '중앙'으로 가져옵니다!
+    useEffect(() => {
+        const fetchSavedNews = async () => {
+            if (!user) {
+                setSavedNewsLinks([]);
+                return;
+            }
+            const { data } = await supabase.from('saved_news').select('link').eq('user_id', user.id);
+            if (data) {
+                setSavedNewsLinks(data.map((item) => item.link));
+            }
+        };
+        fetchSavedNews();
+    }, [user]);
+
+    // 🌟 스크랩 함수도 중앙 통제실에서 쏴줍니다!
+    const toggleScrap = async (news: any, e: React.MouseEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
+
+        if (!user) {
+            setIsAuthModalOpen(true);
+            return;
+        }
+
+        const isSaved = savedNewsLinks.includes(news.link);
+
+        if (isSaved) {
+            const { error } = await supabase.from('saved_news').delete().eq('user_id', user.id).eq('link', news.link);
+            if (!error) setSavedNewsLinks((prev) => prev.filter((link) => link !== news.link));
+        } else {
+            const { error } = await supabase.from('saved_news').insert({
+                user_id: user.id,
+                title: news.title,
+                link: news.link,
+                thumbnail: news.thumbnail,
+                description: news.description
+            });
+            if (!error) setSavedNewsLinks((prev) => [...prev, news.link]);
+        }
+    };
 
     const toggleLang = () => setLang((prev) => (prev === 'KR' ? 'EN' : 'KR'));
     const toggleTheme = () => setTheme((prev) => (prev === 'dark' ? 'light' : 'dark'));
@@ -53,8 +96,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     const closeAuthModal = () => setIsAuthModalOpen(false);
 
     return (
-        // 하위 컴포넌트들에게 user 정보도 같이 내려줍니다!
-        <AppContext.Provider value={{ lang, toggleLang, theme, toggleTheme, isAuthModalOpen, openAuthModal, closeAuthModal, user }}>
+        // 하위 컴포넌트들이 savedNewsLinks와 toggleScrap을 쓸 수 있게 내려줍니다!
+        <AppContext.Provider value={{ lang, toggleLang, theme, toggleTheme, isAuthModalOpen, openAuthModal, closeAuthModal, user, savedNewsLinks, toggleScrap }}>
             {children}
         </AppContext.Provider>
     );
