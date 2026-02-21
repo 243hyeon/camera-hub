@@ -66,12 +66,16 @@ export default function LibraryPage() {
 
     // 🌟 AI가 추천한 제품의 이름을 DB에서 찾아 상세 페이지로 연결하는 함수
     const handleProductClick = async (productName: string) => {
-        // 1. 렌즈 테이블에서 이름으로 검색 (대소문자 무시, 포함 여부 검색)
+
+        // 💡 핵심 1: AI가 'Canon-EOS-R10'처럼 주더라도 'Canon EOS R10'으로 찰떡같이 알아듣게 변환!
+        const searchName = productName.replace(/-/g, ' ');
+
+        // 1. 렌즈 테이블에서 이름으로 검색
         const { data: lensData } = await supabase
             .from('lenses')
             .select('id')
-            .ilike('name', `%${productName}%`)
-            .single();
+            .ilike('name', `%${searchName}%`) // 👈 변환된 이름(searchName)으로 검색합니다!
+            .maybeSingle(); // 💡 핵심 2: 에러 없이 깔끔하게 검색
 
         if (lensData) {
             window.open(`/lenses/${lensData.id}`, '_blank'); // 👈 대화가 끊기지 않게 새 창으로 엽니다!
@@ -82,15 +86,15 @@ export default function LibraryPage() {
         const { data: bodyData } = await supabase
             .from('bodies')
             .select('id')
-            .ilike('name', `%${productName}%`)
-            .single();
+            .ilike('name', `%${searchName}%`) // 👈 변환된 이름(searchName)으로 검색합니다!
+            .maybeSingle();
 
         if (bodyData) {
             window.open(`/bodies/${bodyData.id}`, '_blank');
             return;
         }
 
-        // 3. 우리 DB에 없는 제품일 경우 알림
+        // 3. 정말 우리 DB에 없는 제품일 경우 알림
         alert(lang === 'KR' ? '아직 데이터베이스에 등록되지 않은 제품입니다. 😅' : 'Product not found in our database. 😅');
     };
 
