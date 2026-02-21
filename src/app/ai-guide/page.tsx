@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from 'react';
 import { useAppContext } from '@/components/AppProvider';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import { supabase } from '@/lib/supabase';
 
 type Message = {
     id: number;
@@ -104,6 +105,36 @@ export default function AIGuidePage() {
         }
     };
 
+    // 🌟 AI가 추천한 제품의 이름을 DB에서 찾아 상세 페이지로 연결하는 함수
+    const handleProductClick = async (productName: string) => {
+        // 1. 렌즈 테이블에서 이름으로 검색 (대소문자 무시, 포함 여부 검색)
+        const { data: lensData } = await supabase
+            .from('lenses')
+            .select('id')
+            .ilike('name', `%${productName}%`)
+            .single();
+
+        if (lensData) {
+            window.open(`/lenses/${lensData.id}`, '_blank'); // 👈 대화가 끊기지 않게 새 창으로 엽니다!
+            return;
+        }
+
+        // 2. 렌즈가 아니면 바디 테이블에서 검색
+        const { data: bodyData } = await supabase
+            .from('bodies')
+            .select('id')
+            .ilike('name', `%${productName}%`)
+            .single();
+
+        if (bodyData) {
+            window.open(`/bodies/${bodyData.id}`, '_blank');
+            return;
+        }
+
+        // 3. 우리 DB에 없는 제품일 경우 알림
+        alert(lang === 'KR' ? '아직 데이터베이스에 등록되지 않은 제품입니다. 😅' : 'Product not found in our database. 😅');
+    };
+
     const t = {
         title: lang === 'KR' ? '스마트 AI 큐레이터' : 'Smart AI Curator',
         desc: lang === 'KR' ? '방대한 데이터베이스를 바탕으로 당신에게 딱 맞는 장비를 찾아드립니다.' : 'We find the perfect gear for you based on our massive database.',
@@ -156,10 +187,29 @@ export default function AIGuidePage() {
                                                 td: ({ node, ...props }) => <td className="border-b border-gray-200 dark:border-gray-700/50 px-4 py-3" {...props} />,
                                                 ul: ({ node, ...props }) => <ul className="list-disc pl-5 space-y-1 my-2" {...props} />,
                                                 ol: ({ node, ...props }) => <ol className="list-decimal pl-5 space-y-1 my-2" {...props} />,
-                                                p: ({ node, ...props }) => <p className="m-0 leading-relaxed" {...props} />
+                                                p: ({ node, ...props }) => <p className="m-0 leading-relaxed" {...props} />,
+                                                // <a> 태그(링크)를 가로채서 우리가 원하는 버튼으로 커스텀합니다!
+                                                a: ({ node, href, children }) => {
+                                                    // 우리가 만든 특수 링크(action:)인지 확인
+                                                    if (href?.startsWith('action:')) {
+                                                        const productName = decodeURIComponent(href.replace('action:', ''));
+                                                        return (
+                                                            <button
+                                                                onClick={() => handleProductClick(productName)}
+                                                                className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 text-blue-600 dark:bg-blue-900/40 dark:text-blue-400 rounded-full text-xs font-bold hover:bg-blue-100 dark:hover:bg-blue-900/60 transition-colors border border-blue-200 dark:border-blue-800 shadow-sm mx-1 my-1"
+                                                            >
+                                                                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                                                                {children} 스펙 보기
+                                                            </button>
+                                                        );
+                                                    }
+                                                    // 일반 인터넷 링크는 원래대로 파란색 밑줄로 렌더링
+                                                    return <a href={href} target="_blank" rel="noreferrer" className="text-blue-500 hover:underline">{children}</a>;
+                                                }
                                             }}
                                         >
-                                            {msg.content}
+                                            {/* 👇 정규식을 이용해 [[COMPARE:이름]] 을 특수 마크다운 링크로 변환해서 렌더링! */}
+                                            {msg.content.replace(/\[\[COMPARE:(.*?)\]\]/g, '[$1](action:$1)')}
                                         </ReactMarkdown>
                                     </div>
                                 )}
