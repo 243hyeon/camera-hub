@@ -27,12 +27,14 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     const [theme, setTheme] = useState('dark');
     const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
     const [user, setUser] = useState<any>(null);
+    const [isMounted, setIsMounted] = useState(false);
 
     // 👇 스크랩 목록을 중앙에서 관리합니다.
     const [savedNewsLinks, setSavedNewsLinks] = useState<string[]>([]);
     const [savedAiChats, setSavedAiChats] = useState<string[]>([]); // AI 답변 스크랩 목록
 
     useEffect(() => {
+        setIsMounted(true);
         const root = window.document.documentElement;
         if (theme === 'dark') root.classList.add('dark');
         else root.classList.remove('dark');
@@ -134,7 +136,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     return (
         // 하위 컴포넌트들이 savedNewsLinks와 toggleScrap을 쓸 수 있게 내려줍니다!
         <AppContext.Provider value={{ lang, toggleLang, theme, toggleTheme, isAuthModalOpen, openAuthModal, closeAuthModal, user, savedNewsLinks, toggleScrap, savedAiChats, toggleAiScrap }}>
-            {children}
+            {isMounted ? children : <div style={{ visibility: 'hidden' }}>{children}</div>}
         </AppContext.Provider>
     );
 }

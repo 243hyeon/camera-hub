@@ -18,6 +18,9 @@ export default function AIGuidePage() {
     const [messages, setMessages] = useState<Message[]>([]);
     const [isLoading, setIsLoading] = useState(false);
     const chatContainerRef = useRef<HTMLDivElement>(null);
+    const [selectedProduct, setSelectedProduct] = useState<any>(null); // 검색된 제품의 모든 정보 저장
+    const [isProductModalOpen, setIsProductModalOpen] = useState(false); // 팝업창 열림/닫힘 스위치
+    const [productType, setProductType] = useState<'body' | 'lens' | 'not_found' | null>(null); // 바디인지 렌즈인지 구분
 
     // 언어 변경 시 초기 인사말 설정
     useEffect(() => {
@@ -106,37 +109,46 @@ export default function AIGuidePage() {
     };
 
     // 🌟 AI가 추천한 제품의 이름을 DB에서 찾아 상세 페이지로 연결하는 함수
+    // 🌟 AI가 추천한 제품의 정보를 가져와서 팝업창에 띄우는 함수
     const handleProductClick = async (productName: string) => {
 
         // 💡 핵심 1: AI가 'Canon-EOS-R10'처럼 주더라도 'Canon EOS R10'으로 찰떡같이 알아듣게 변환!
         const searchName = productName.replace(/-/g, ' ');
 
-        // 1. 렌즈 테이블에서 이름으로 검색
+        // 1. 렌즈 테이블에서 모든 정보(*) 검색
         const { data: lensData } = await supabase
             .from('lenses')
-            .select('id')
-            .ilike('name', `%${searchName}%`) // 👈 변환된 이름(searchName)으로 검색합니다!
+            .select('*') // 👈 이제 id만 가져오는 게 아니라 전부 다 가져옵니다!
+            .ilike('name', `%${searchName}%`)
+            .limit(1)
             .maybeSingle(); // 💡 핵심 2: 에러 없이 깔끔하게 검색
 
         if (lensData) {
-            window.open(`/lenses/${lensData.id}`, '_blank'); // 👈 대화가 끊기지 않게 새 창으로 엽니다!
+            setSelectedProduct(lensData);
+            setProductType('lens');
+            setIsProductModalOpen(true); // 👈 새 창 대신 팝업 스위치 ON!
             return;
         }
 
-        // 2. 렌즈가 아니면 바디 테이블에서 검색
+        // 2. 바디 테이블에서 모든 정보(*) 검색
         const { data: bodyData } = await supabase
             .from('bodies')
-            .select('id')
-            .ilike('name', `%${searchName}%`) // 👈 변환된 이름(searchName)으로 검색합니다!
+            .select('*')
+            .ilike('name', `%${searchName}%`)
+            .limit(1)
             .maybeSingle();
 
         if (bodyData) {
-            window.open(`/bodies/${bodyData.id}`, '_blank');
+            setSelectedProduct(bodyData);
+            setProductType('body');
+            setIsProductModalOpen(true); // 👈 새 창 대신 팝업 스위치 ON!
             return;
         }
 
         // 3. 정말 우리 DB에 없는 제품일 경우 알림
-        alert(lang === 'KR' ? '아직 데이터베이스에 등록되지 않은 제품입니다. 😅' : 'Product not found in our database. 😅');
+        setSelectedProduct({ name: searchName });
+        setProductType('not_found');
+        setIsProductModalOpen(true);
     };
 
     const t = {
@@ -199,8 +211,10 @@ export default function AIGuidePage() {
                                                         const productName = decodeURIComponent(href.replace('#compare:', ''));
                                                         return (
                                                             <button
+                                                                type="button"
                                                                 onClick={(e) => {
                                                                     e.preventDefault();
+                                                                    e.stopPropagation();
                                                                     handleProductClick(productName);
                                                                 }}
                                                                 className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 text-blue-600 dark:bg-blue-900/40 dark:text-blue-400 rounded-full text-xs font-bold hover:bg-blue-100 dark:hover:bg-blue-900/60 transition-colors border border-blue-200 dark:border-blue-800 shadow-sm mx-1 my-1"
@@ -284,6 +298,154 @@ export default function AIGuidePage() {
                 </div>
 
             </div>
+
+            {/* 🌟 팝업창 (Modal) UI */}
+            {isProductModalOpen && selectedProduct && (
+                // 1. 어두운 배경 (여백 클릭 시 닫힘)
+                <div
+                    className="fixed inset-0 z-[120] flex items-center justify-center bg-black/70 backdrop-blur-sm animate-fade-in px-4"
+                    onClick={() => setIsProductModalOpen(false)}
+                >
+                    {/* 2. 팝업창 본체 (클릭해도 안 닫히게 방어!) */}
+                    <div
+                        className="relative w-full max-w-3xl bg-white dark:bg-[#121212] rounded-3xl p-8 shadow-2xl overflow-y-auto max-h-[90vh] border border-gray-200 dark:border-gray-800"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        {/* 우측 상단 X 버튼 */}
+                        <button
+                            onClick={() => setIsProductModalOpen(false)}
+                            className="absolute top-5 right-5 p-2 bg-gray-100 dark:bg-gray-800 rounded-full text-gray-500 hover:text-gray-900 dark:hover:text-white transition-colors"
+                        >
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                        </button>
+
+                        {/* 👇 여기서부터 분기 처리! */}
+                        {productType === 'not_found' ? (
+                            // 🌟 데이터가 없을 때 보여줄 예쁜 에러 화면
+                            <div className="flex flex-col items-center justify-center py-16 text-center">
+                                <div className="w-20 h-20 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mb-6">
+                                    <svg className="w-10 h-10 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                </div>
+                                <h2 className="text-2xl font-extrabold text-gray-900 dark:text-white mb-3">
+                                    아직 등록되지 않은 장비입니다 😅
+                                </h2>
+                                <p className="text-gray-500 dark:text-gray-400 max-w-sm leading-relaxed">
+                                    <strong className="text-blue-500">{selectedProduct?.name}</strong> 모델은 현재 데이터베이스에 없습니다.<br />
+                                    빠른 시일 내에 스펙을 업데이트해 두겠습니다!
+                                </p>
+                                <button
+                                    onClick={() => setIsProductModalOpen(false)}
+                                    className="mt-8 px-6 py-2.5 bg-gray-900 dark:bg-white text-white dark:text-black font-bold rounded-full hover:scale-105 transition-transform"
+                                >
+                                    돌아가기
+                                </button>
+                            </div>
+                        ) : (
+                            // 🌟 기존 바디/렌즈 상세 정보 레이아웃
+                            <div className="flex flex-col md:flex-row gap-8 mt-4">
+                                {/* 왼쪽: 이미지 */}
+                                <div className="w-full md:w-1/2 flex items-center justify-center bg-gray-50 dark:bg-white rounded-2xl p-6">
+                                    <img src={selectedProduct.image_url} alt={selectedProduct.name} className="w-full h-auto max-h-64 object-contain" />
+                                </div>
+
+                                {/* 오른쪽: 스펙 텍스트 */}
+                                <div className="w-full md:w-1/2 flex flex-col justify-center">
+                                    <span className="text-blue-600 dark:text-blue-500 font-extrabold text-xs uppercase tracking-widest mb-2">
+                                        {selectedProduct.brand}
+                                    </span>
+                                    <h2 className="text-3xl font-extrabold text-gray-900 dark:text-white mb-3">
+                                        {selectedProduct.name}
+                                    </h2>
+                                    <p className="text-2xl font-bold text-gray-800 dark:text-gray-300 mb-6 pb-6 border-b border-gray-100 dark:border-gray-800">
+                                        {selectedProduct.price?.toLocaleString()} <span className="text-base font-medium text-gray-500">원</span>
+                                    </p>
+
+                                    {/* 🌟 상세 설명 영역 (상세 페이지와 동일하게 추가) */}
+                                    {selectedProduct.description && (
+                                        <div className="mb-6">
+                                            <p className="text-xs text-gray-500 font-bold mb-1">상세 설명</p>
+                                            <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
+                                                {selectedProduct.description}
+                                            </p>
+                                        </div>
+                                    )}
+
+                                    <p className="text-sm font-bold text-gray-900 dark:text-white mb-3">주요 스펙</p>
+
+                                    {/* 핵심 스펙 그리드 */}
+                                    <div className="grid grid-cols-2 gap-3">
+                                        {productType === 'body' ? (
+                                            <>
+                                                {/* 1. 센서 */}
+                                                <div className="bg-gray-50 dark:bg-[#1c1c1c] p-3.5 rounded-xl border border-gray-100 dark:border-gray-800">
+                                                    <span className="text-xs text-gray-500 font-bold block mb-1">센서</span>
+                                                    <span className="font-bold text-gray-900 dark:text-white">{selectedProduct.sensor}</span>
+                                                </div>
+                                                {/* 2. 화소수 */}
+                                                <div className="bg-gray-50 dark:bg-[#1c1c1c] p-3.5 rounded-xl border border-gray-100 dark:border-gray-800">
+                                                    <span className="text-xs text-gray-500 font-bold block mb-1">화소수</span>
+                                                    <span className="font-bold text-gray-900 dark:text-white">{selectedProduct.pixels}</span>
+                                                </div>
+                                                {/* 3. 렌즈 마운트 */}
+                                                <div className="bg-gray-50 dark:bg-[#1c1c1c] p-3.5 rounded-xl border border-gray-100 dark:border-gray-800">
+                                                    <span className="text-xs text-gray-500 font-bold block mb-1">렌즈 마운트</span>
+                                                    <span className="font-bold text-gray-900 dark:text-white">{selectedProduct.mount}</span>
+                                                </div>
+                                                {/* 4. 손떨림 보정 */}
+                                                <div className="bg-gray-50 dark:bg-[#1c1c1c] p-3.5 rounded-xl border border-gray-100 dark:border-gray-800">
+                                                    <span className="text-xs text-gray-500 font-bold block mb-1">손떨림 보정</span>
+                                                    <span className="font-bold text-gray-900 dark:text-white">{selectedProduct.stabilization}</span>
+                                                </div>
+                                                {/* 5. 디스플레이 */}
+                                                <div className="bg-gray-50 dark:bg-[#1c1c1c] p-3.5 rounded-xl border border-gray-100 dark:border-gray-800">
+                                                    <span className="text-xs text-gray-500 font-bold block mb-1">디스플레이</span>
+                                                    <span className="font-bold text-gray-900 dark:text-white">{selectedProduct.display}</span>
+                                                </div>
+                                                {/* 6. 연사 속도 */}
+                                                <div className="bg-gray-50 dark:bg-[#1c1c1c] p-3.5 rounded-xl border border-gray-100 dark:border-gray-800">
+                                                    <span className="text-xs text-gray-500 font-bold block mb-1">연사 속도</span>
+                                                    <span className="font-bold text-gray-900 dark:text-white">{selectedProduct.fps}</span>
+                                                </div>
+                                                {/* 7. 동영상 */}
+                                                <div className="bg-gray-50 dark:bg-[#1c1c1c] p-3.5 rounded-xl border border-gray-100 dark:border-gray-800">
+                                                    <span className="text-xs text-gray-500 font-bold block mb-1">동영상</span>
+                                                    <span className="font-bold text-gray-900 dark:text-white">{selectedProduct.video}</span>
+                                                </div>
+                                                {/* 8. 무게 */}
+                                                <div className="bg-gray-50 dark:bg-[#1c1c1c] p-3.5 rounded-xl border border-gray-100 dark:border-gray-800">
+                                                    <span className="text-xs text-gray-500 font-bold block mb-1">무게</span>
+                                                    <span className="font-bold text-gray-900 dark:text-white">{selectedProduct.weight}</span>
+                                                </div>
+                                            </>
+                                        ) : (
+                                            <>
+                                                <div className="bg-gray-50 dark:bg-[#1c1c1c] p-3.5 rounded-xl border border-gray-100 dark:border-gray-800">
+                                                    <span className="text-xs text-gray-500 font-bold block mb-1">화각</span>
+                                                    <span className="font-bold text-gray-900 dark:text-white">{selectedProduct.angle}</span>
+                                                </div>
+                                                <div className="bg-gray-50 dark:bg-[#1c1c1c] p-3.5 rounded-xl border border-gray-100 dark:border-gray-800">
+                                                    <span className="text-xs text-gray-500 font-bold block mb-1">종류</span>
+                                                    <span className="font-bold text-gray-900 dark:text-white">{selectedProduct.lens_type}</span>
+                                                </div>
+                                                <div className="bg-gray-50 dark:bg-[#1c1c1c] p-3.5 rounded-xl border border-gray-100 dark:border-gray-800">
+                                                    <span className="text-xs text-gray-500 font-bold block mb-1">조리개</span>
+                                                    <span className="font-bold text-gray-900 dark:text-white">{selectedProduct.aperture}</span>
+                                                </div>
+                                                <div className="bg-gray-50 dark:bg-[#1c1c1c] p-3.5 rounded-xl border border-gray-100 dark:border-gray-800">
+                                                    <span className="text-xs text-gray-500 font-bold block mb-1">필터 구경</span>
+                                                    <span className="font-bold text-gray-900 dark:text-white">{selectedProduct.filter_size}</span>
+                                                </div>
+                                            </>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

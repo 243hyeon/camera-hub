@@ -26,7 +26,7 @@ export default function RootLayout({
   return (
     <html lang="ko" suppressHydrationWarning>
       {/* 라이트모드는 밝은 배경(bg-gray-50), 다크모드는 어두운 배경(dark:bg-[#121212]) */}
-      <body className={`${inter.variable} font-sans antialiased min-h-screen flex flex-col bg-gray-50 dark:bg-[#121212] transition-colors duration-300`}>
+      <body suppressHydrationWarning className={`${inter.variable} font-sans antialiased min-h-screen flex flex-col bg-gray-50 dark:bg-[#121212] transition-colors duration-300`}>
         <AppProvider>
           <Suspense fallback={null}>
             <Navbar />
