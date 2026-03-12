@@ -224,9 +224,9 @@ export default function CommunityPage() {
                                     </h3>
                                 </div>
 
-                                {/* 중단: 글 내용 미리보기 */}
+                                {/* 중단: 글 내용 미리보기 (HTML 태그 제거 필터 장착) */}
                                 <p className="text-sm text-gray-500 dark:text-gray-400 mb-4 line-clamp-2 leading-relaxed pl-[4.5rem]">
-                                    {post.content}
+                                    {post.content.replace(/<[^>]*>?/gm, '').replace(/&nbsp;/g, ' ')}
                                 </p>
 
                                 {/* 👇 🌟 새로 추가: 사진이 있으면 썸네일로 보여주기 👇 */}
